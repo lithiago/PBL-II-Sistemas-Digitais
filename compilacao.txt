@@ -1,0 +1,5 @@
+as -o hello.o graficos.s
+  
+gcc -o hello test.c hello.o -no-pie 
+  
+./hello 
