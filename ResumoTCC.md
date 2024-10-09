@@ -3,13 +3,13 @@
 ### VGA CONTROLE DOS SINAIS PARA GERAÇÃO DE VÍDEO: 
 Para o controle e geração desses sinais um controlador de vídeo é necessário. O sinal de sincronismo horizontal (hsync) especifica o tempo requerido para percorrer uma linha do monitor. Ele é ativado em nível lógico 0 e inidica que uma linha foi finalizada e que a próxima linha será iniciada. O sinal de sincronimso vertical (vsync) controla o tempo necessário para percorrer toda a tela. Ele é ativo em nível lógico 0 e indica que um Frame.
 
-![Foto da Placa](folder/Frame.png)
+![Foto Frame](Images/Frame.png)
 
 - Área Ativa: Corresponde ao espaço de exibição dos pixels na tela.
 - Front Porch e Back Porch: Corresponde aos tempos de esepera que devem ser implementados para delimitar a região ativa. Esses tempos dependem da resolução e frequência da atualização da tela.
 
 ## Modelagem e Organização da Arquitetura
-![Foto da Arquitetura](folder/Representacao%20da%20Arquitetura.png)
+![Foto da Arquitetura](Images//Representacao%20da%20Arquitetura.png)
   1. Inicialização das memórias: O processo de renderização começa com a inicialização de duas memórias responsáveis por armazenar os bits de cores RGB dos sprites e do background da tela.
   2. Impressão dos elementos da tela: O padrão gráfico escolhido é o VGA, com resolução de 640x480 pixels. A varredura da tela é realizada da esquerda para a direita e de cima para baixo. Após a varredura completa da área ativa, os sprites são atualizados com base nas novas definições.
   3. Armazenamento dos sprites: As informações dos sprites são armazenadas diretamente no hardware. As atualizações são feitas enviando comandos ao módulo gráfico, que é responsável por gerenciar o processo de renderização.
@@ -25,6 +25,7 @@ Para o controle e geração desses sinais um controlador de vídeo é necessári
   13. Hierarquia de Funções: No fluxo da arquitetura, há uma separação clara entre as funções de hardware e software. O Nios II manipula a lógica do jogo e transmite as coordenadas e atualizações dos sprites, enquanto o processador gráfico é responsável pela execução dessas instruções no nível de hardware, como movimentação dos sprites e alteração do background.
   14. Sincronização e Comunicação: A comunicação entre o Nios II e o processador gráfico é feita por meio de duas FIFOs que permitem a troca de dados de maneira síncrona, garantindo que as instruções não sejam perdidas ou duplicadas. Essa estrutura de comunicação baseada em FIFOs assegura que as instruções sejam executadas em ordem e em intervalos de tempo apropriados.
 ## Arquitetura do Processador Gráfico
+![Foto Processador Gráfico](Images/Representacao%20da%20Arquitetura%20Processador%20Grafico.png)
   1. Unidade de Controle: 
   - Consiste em uma máquina de estados que gerencia todo o processo de leitura, decodificação e execução das instruções enviadas pelo processador Nios II.
   - Ela organiza as operações de renderização, garantindo que cada instrução seja processada em ordem e no momento correto.
@@ -66,6 +67,9 @@ Para o controle e geração desses sinais um controlador de vídeo é necessári
   - Este módulo combina os valores de cor RGB dos sprites, polígonos e background, determinando a cor final que será desenhada em cada pixel da tela.
   - O gerador RGB prioriza a renderização dos sprites sobre os polígonos e o background, garantindo que os objetos em primeiro plano sejam corretamente exibidos.
 ## Instruções no Processador Gráfico
+   ![Foto WBR](Images/Formato%20das%20Instrucoes%20WBR.png)
+   ![Foto WSM](Images/Formato%20das%20Instrucoes%20WSM.png)
+   ![Foto DP](Images/Formato%20das%20Instrucoes%20DP.png)
   1. WBR (Escrita no Banco de Registradores):
      - Configura os registradores que armazenam as informações dos sprites e a cor base do background.
      - A cor do background é armazenada no primeiro registrador, enquanto as informações dos sprites são armazenadas em registradores específicos com coordenadas X e Y, offset de memória e um bit de ativação/desativação
