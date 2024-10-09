@@ -1,10 +1,16 @@
-.global somaValores   @ Define a função `somaValores` como global para poder ser chamada externamente
+.section .data                ; Seção de dados
+    msg: .asciz "Hello, World!\n" ; Mensagem a ser exibida
 
-somaValores:
-    @ A função recebe dois parâmetros:
-    @ r0: primeiro valor (valor1)
-    @ r1: segundo valor (valor2)
+.section .text                ; Seção de código
+    .global hello_world       ; Tornar a função global
 
-    add r0, r0, r1    @ Soma o valor de r0 (valor1) e r1 (valor2) e armazena o resultado em r0
+hello_world:                  ; Início da função
+    ldr r0, =1                ; Descritor de arquivo 1 (stdout)
+    ldr r1, =msg              ; Endereço da mensagem
+    ldr r2, =14               ; Comprimento da mensagem (14 bytes)
 
-    bx lr             @ Retorna da função usando o registrador LR (link register)
+    ; Chamada de sistema para escrever na saída padrão
+    mov r7, #4                ; Número da chamada de sistema para sys_write
+    svc 0                     ; Executa a chamada de sistema
+
+    bx lr                     ; Retorna da função
