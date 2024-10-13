@@ -68,20 +68,18 @@ sendinstruction:
 
     @ FIFO não está cheio, prosseguir com o envio
 
-    @ Escrever 0 em h2p_lw_wrReg_addr (endereçado em 0x60, por exemplo)
-    ldr r1, =0x60              @ Carregar o endereço de h2p_lw_wrReg_addr
+    @ Escrever 0 em h2p_lw_wrReg_addr
+    ldr r1, =h2p_lw_wrReg_addr @ Carregar o endereço de h2p_lw_wrReg_addr
     mov r0, #0                 @ Carregar o valor 0
     str r0, [r1]               @ Escrever 0 no endereço h2p_lw_wrReg_addr
 
-    @ Escrever dataA em h2p_lw_dataA_addr (endereçado em 0x80, por exemplo)
-    ldr r2, =0x80              @ Carregar o endereço de h2p_lw_dataA_addr
-    mov r0, r4                 @ Mover dataA para r0 (assumindo que r4 contém dataA)
-    str r0, [r2]               @ Escrever dataA em h2p_lw_dataA_addr
+    @ Escrever dataA em h2p_lw_dataA_addr
+    ldr r2, =h2p_lw_dataA_addr @ Carregar o endereço de h2p_lw_dataA_addr
+    str r4, [r2]               @ Escrever dataA em h2p_lw_dataA_addr (assumindo que r4 contém dataA)
 
-    @ Escrever dataB em h2p_lw_dataB_addr (endereçado em 0x70, por exemplo)
-    ldr r3, =0x70              @ Carregar o endereço de h2p_lw_dataB_addr
-    mov r0, r5                 @ Mover dataB para r0 (assumindo que r5 contém dataB)
-    str r0, [r3]               @ Escrever dataB em h2p_lw_dataB_addr
+    @ Escrever dataB em h2p_lw_dataB_addr
+    ldr r3, =h2p_lw_dataB_addr @ Carregar o endereço de h2p_lw_dataB_addr
+    str r5, [r3]               @ Escrever dataB em h2p_lw_dataB_addr (assumindo que r5 contém dataB)
 
     @ Escrever 1 em h2p_lw_wrReg_addr para iniciar a escrita
     mov r0, #1                 @ Carregar o valor 1
@@ -125,24 +123,49 @@ createMappingMemory:
 
     mov r7, r0                    @ Salva o retorno de mmap (virtual_base) em r7
 
-    @ Calcula h2p_lw_dataA_addr
+    @ Calcula os endereços mapeados
     ldr r0, =ALT_LWFPGASLVS_OFST  @ Carrega ALT_LWFPGASLVS_OFST
-    ldr r1, =DATA_A_BASE          @ Carrega DATA_A_BASE
-    add r0, r0, r1                @ ALT_LWFPGASLVS_OFST + DATA_A_BASE
-    ldr r1, =HW_REGS_MASK         @ Carrega HW_REGS_MASK
+    ldr r1, =DATA_A_BASE
+    add r0, r0, r1                @ Calcula h2p_lw_dataA_addr
+    ldr r1, =HW_REGS_MASK
     and r0, r0, r1                @ Aplica a máscara
-    add r0, r7, r0                @ virtual_base + (ALT_LWFPGASLVS_OFST + DATA_A_BASE) & HW_REGS_MASK
+    add r0, r7, r0                @ Adiciona virtual_base
     str r0, =h2p_lw_dataA_addr    @ Salva o endereço em h2p_lw_dataA_addr
 
-    @ Calcula h2p_lw_dataB_addr
     ldr r0, =ALT_LWFPGASLVS_OFST
     ldr r1, =DATA_B_BASE
-    add r0, r0, r1
+    add r0, r0, r1                @ Calcula h2p_lw_dataB_addr
     and r0, r0, r1
     add r0, r7, r0
-    str r0, =h2p_lw_dataB_addr
+    str r0, =h2p_lw_dataB_addr    @ Salva o endereço em h2p_lw_dataB_addr
 
-    @ Calcule os outros endereços da mesma forma (WRREG_BASE, WRFULL_BASE, SCREEN_BASE, RESET_PULSECOUNTER_BASE)
+    ldr r0, =ALT_LWFPGASLVS_OFST
+    ldr r1, =WRREG_BASE
+    add r0, r0, r1                @ Calcula h2p_lw_wrReg_addr
+    and r0, r0, r1
+    add r0, r7, r0
+    str r0, =h2p_lw_wrReg_addr    @ Salva o endereço em h2p_lw_wrReg_addr
+
+    ldr r0, =ALT_LWFPGASLVS_OFST
+    ldr r1, =WRFULL_BASE
+    add r0, r0, r1                @ Calcula h2p_lw_wrFull_addr
+    and r0, r0, r1
+    add r0, r7, r0
+    str r0, =h2p_lw_wrFull_addr    @ Salva o endereço em h2p_lw_wrFull_addr
+
+    ldr r0, =ALT_LWFPGASLVS_OFST
+    ldr r1, =SCREEN_BASE
+    add r0, r0, r1                @ Calcula h2p_lw_screen_addr
+    and r0, r0, r1
+    add r0, r7, r0
+    str r0, =h2p_lw_screen_addr    @ Salva o endereço em h2p_lw_screen_addr
+
+    ldr r0, =ALT_LWFPGASLVS_OFST
+    ldr r1, =RESET_PULSECOUNTER_BASE
+    add r0, r0, r1                @ Calcula h2p_lw_result_pulseCounter_addr
+    and r0, r0, r1
+    add r0, r7, r0
+    str r0, =h2p_lw_result_pulseCounter_addr    @ Salva o endereço em h2p_lw_result_pulseCounter_addr
 
     mov r0, #1                    @ Retorna 1 (sucesso)
     b end_createMappingMemory
