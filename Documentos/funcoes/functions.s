@@ -1,6 +1,26 @@
-    .global isFull          @ Torna a função isFull visível globalmente
+@ Definição das constantes e strings
+mem_device:      .asciz "/dev/mem"
+error_open_str:  .asciz "[ERROR]: could not open \"/dev/mem\"...\n"
+error_mmap_str:  .asciz "[ERROR]: mmap() failed...\n"
+open_flags:      .word 0x1010         @ O_RDWR | O_SYNC
+PROT_READ_WRITE: .word 0x3            @ PROT_READ | PROT_WRITE
+NULL:            .word 0              @ NULL definido como 0
+HW_REGS_SPAN:    .word 0x20000        @ Valor para HW_REGS_SPAN
+MAP_SHARED:      .word 0x01           @ MAP_SHARED flag
+MAP_FAILED:      .word 0xFFFFFFFF     @ Definindo o valor MAP_FAILED para mmap()
+HW_REGS_BASE:    .word 0xff200000     @ Valor para HW_REGS_BASE
+HW_REGS_MASK:    .word 0xFFFFF        @ Máscara HW_REGS_MASK
+DATA_A_BASE:     .word 0x80           @ Base address para DATA_A
+DATA_B_BASE:     .word 0x90           @ Base address para DATA_B
+WRREG_BASE:      .word 0x100          @ Base address para WRREG
+WRFULL_BASE:     .word 0x110          @ Base address para WRFULL
+SCREEN_BASE:     .word 0x120          @ Base address para SCREEN
+RESET_PULSECOUNTER_BASE: .word 0x130  @ Base address para RESET_PULSECOUNTER
+ALT_LWFPGASLVS_OFST: .word 0x40000    @ Offset para ALT_LWFPGASLVS_OFST
+
+    .global isFull          
     .type isFull, %function
-    
+
 isFull:
     ldr r1, =h2p_lw_wrFull_addr  @ Carrega o endereço de h2p_lw_wrFull_addr no registrador r1
     ldr r0, [r1]                 @ Carrega o valor no endereço apontado por r1 no registrador r0
@@ -145,22 +165,4 @@ end_createMappingMemory:
     pop {r4, r5, r6, r7, lr}      @ Restaura os registradores e o endereço de retorno
     bx lr                         @ Retorna da função
 
-    @ Definição das constantes e strings
-mem_device:      .asciz "/dev/mem"
-error_open_str:  .asciz "[ERROR]: could not open \"/dev/mem\"...\n"
-error_mmap_str:  .asciz "[ERROR]: mmap() failed...\n"
-open_flags:      .word 0x1010         @ O_RDWR | O_SYNC
-PROT_READ_WRITE: .word 0x3            @ PROT_READ | PROT_WRITE
-NULL:            .word 0              @ NULL definido como 0
-HW_REGS_SPAN:    .word 0x20000        @ Valor para HW_REGS_SPAN
-MAP_SHARED:      .word 0x01           @ MAP_SHARED flag
-MAP_FAILED:      .word 0xFFFFFFFF     @ Definindo o valor MAP_FAILED para mmap()
-HW_REGS_BASE:    .word 0xff200000     @ Valor para HW_REGS_BASE
-HW_REGS_MASK:    .word 0xFFFFF        @ Máscara HW_REGS_MASK
-DATA_A_BASE:     .word 0x80           @ Base address para DATA_A
-DATA_B_BASE:     .word 0x90           @ Base address para DATA_B
-WRREG_BASE:      .word 0x100          @ Base address para WRREG
-WRFULL_BASE:     .word 0x110          @ Base address para WRFULL
-SCREEN_BASE:     .word 0x120          @ Base address para SCREEN
-RESET_PULSECOUNTER_BASE: .word 0x130  @ Base address para RESET_PULSECOUNTER
-ALT_LWFPGASLVS_OFST: .word 0x40000    @ Offset para ALT_LWFPGASLVS_OFST
+
