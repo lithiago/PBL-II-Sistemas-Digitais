@@ -151,7 +151,8 @@ end_function:
     bx lr                          @ Retorna da função
 
 setPolygon:
-    push {r4, r5, r6, r7, r8}              @ Empilha registradores para preservar o estado
+    setPolygon:
+    push {r4, r5, r6, r7, r8}            @ Empilha registradores para preservar o estado
 
     @ Carrega os parâmetros
     mov r4, r0                            @ r4 = address
@@ -164,28 +165,29 @@ setPolygon:
     mov r0, r5                            @ Passa 'opcode' em r0
     mov r1, #0                            @ Passa 0 em r1 (segundo parâmetro)
     mov r2, r4                            @ Passa 'address' em r2
-    bl dataA_builder                       @ Chama dataA_builder, resultado em r0
+    bl dataA_builder                      @ Chama dataA_builder, resultado em r0
 
-    @ O resultado de dataA_builder está agora em r0
+    @ O resultado de dataA_builder está agora em r1 (dataA)
     mov r1, r0                            @ Armazena o resultado de dataA_builder em r1 (dataA)
 
-    @ Inicializa dataB
-    mov r0, r7                            @ r0 = form
-    lsl r0, r0, #9                        @ dataB = form << 9
-
-    orr r0, r0, r6                        @ dataB = dataB | color
-    lsl r0, r0, #4                        @ dataB = dataB << 4
-    orr r0, r0, r8                        @ dataB = dataB | mult
-    lsl r0, r0, #9                        @ dataB = dataB << 9
-    orr r0, r0, r3                        @ dataB = dataB | ref_point_y
-    lsl r0, r0, #9                        @ dataB = dataB << 9
-    orr r0, r0, r4                        @ dataB = dataB | ref_point_x
+    @ Inicializa dataB (usando r2 para evitar sobrescrever r0)
+    mov r2, r7                            @ r2 = form
+    lsl r2, r2, #9                        @ dataB = form << 9
+    orr r2, r2, r6                        @ dataB = dataB | color
+    lsl r2, r2, #4                        @ dataB = dataB << 4
+    orr r2, r2, r8                        @ dataB = dataB | mult
+    lsl r2, r2, #9                        @ dataB = dataB << 9
+    orr r2, r2, r3                        @ dataB = dataB | ref_point_y
+    lsl r2, r2, #9                        @ dataB = dataB << 9
+    orr r2, r2, r4                        @ dataB = dataB | ref_point_x
 
     @ Envia os dados para sendInstruction
-    bl sendInstruction                     @ Chama sendInstruction(dataA, dataB)
+    mov r0, r1                            @ Primeiro argumento: dataA (em r1)
+    mov r1, r2                            @ Segundo argumento: dataB (em r2)
+    bl sendInstruction                    @ Chama sendInstruction(dataA, dataB)
 
     pop {r4, r5, r6, r7, r8}              @ Desempilha os registradores
-    bx lr                                  @ Retorna da função
+    bx lr                                 @ Retorna da função
 
 
 @ Função Sprite
