@@ -314,48 +314,59 @@ dataA_builder:
 	.thumb
 	.thumb_func
 	.type	setPolygon, %function
-
 setPolygon:
-   push {r4,r5,r6,r7,r8,r9,r10,lr} @recebe 7 parametors | 4 em r0,,r1,r2,r3 | o resto na pilha
-
-    @ r0 = address
-    @ r1 = opcode
-    @ r2 = color
-    @ r3 = form
-    @ r4 = mult
-    @ r5 = ref_point_x
-    @ r6 = ref_point_y
-
-    @	unsigned long dataA = dataA_builder(opcode, 0, address);
-    mov r7, r1 @botando o opcode (r1) em r7
-    mov r8, r0 @botando o address(r0) em r8
-    mov r9, r2 @botando o color(r2) em r9
-
-    mov r0, r7 @botando o opcode (r7) em r0
-    mov r1, #0 @botando o 0 en r1
-    mov r2, r8 @botando o adress(r8) em r2  
-
-    bl dataA_builder               @ Chama a função dataA_builder
-    mov r10, r0                     @ dataA = resultado de dataA_bui
-    @r10 é o meu dataA
-
-    mov r0, #0 @unsigned long dataB = 0;
-    mov r0, r3 @dataB = form;
-    lsl r0, r0, #9 @dataB = dataB << 9;
-    orr r0, r0, r9 @dataB = dataB | color;
-    lsl r0, r0, #4 @dataB = dataB << 4;
-    orr r0, r0, r4 @dataB = dataB | mult;
-    lsl r0, r0, #9 @dataB = dataB << 9;
-    orr r0, r0, r6 @dataB = dataB | ref_point_y;
-    lsl r0, r0, #9 @dataB = dataB << 9;
-    orr r0, r0, r5 @dataB = dataB | ref_point_x;
-
-    mov r1, r0 @botando o datab(r0) em r1
-    mov r0, r10 @botando o dataa(r10) em r0
-
-    bl sendInstruction @chama a funçao sendInstruction
-    pop {r4, r5, r6, r7, r8, r9, r10, pc} @ Restaura os registradores e retorna
-
+	@ args = 12, pretend = 0, frame = 24
+	@ frame_needed = 1, uses_anonymous_args = 0
+	push	{r7, lr}
+	sub	sp, sp, #24
+	add	r7, sp, #0
+	str	r0, [r7, #12]
+	str	r1, [r7, #8]
+	str	r2, [r7, #4]
+	str	r3, [r7, #0]
+	ldr	r0, [r7, #8]
+	mov	r1, #0
+	ldr	r2, [r7, #12]
+	bl	dataA_builder
+	str	r0, [r7, #16]
+	mov	r3, #0
+	str	r3, [r7, #20]
+	ldr	r3, [r7, #0]
+	str	r3, [r7, #20]
+	ldr	r3, [r7, #20]
+	lsl	r3, r3, #9
+	str	r3, [r7, #20]
+	ldr	r3, [r7, #4]
+	ldr	r2, [r7, #20]
+	orrs	r3, r3, r2
+	str	r3, [r7, #20]
+	ldr	r3, [r7, #20]
+	lsl	r3, r3, #4
+	str	r3, [r7, #20]
+	ldr	r3, [r7, #32]
+	ldr	r2, [r7, #20]
+	orrs	r3, r3, r2
+	str	r3, [r7, #20]
+	ldr	r3, [r7, #20]
+	lsl	r3, r3, #9
+	str	r3, [r7, #20]
+	ldr	r3, [r7, #40]
+	ldr	r2, [r7, #20]
+	orrs	r3, r3, r2
+	str	r3, [r7, #20]
+	ldr	r3, [r7, #20]
+	lsl	r3, r3, #9
+	str	r3, [r7, #20]
+	ldr	r3, [r7, #36]
+	ldr	r2, [r7, #20]
+	orrs	r3, r3, r2
+	str	r3, [r7, #20]
+	ldr	r0, [r7, #16]
+	ldr	r1, [r7, #20]
+	bl	sendInstruction
+	add	r7, r7, #24
+	mov	sp, r7
+	pop	{r7, pc}
 	.size	setPolygon, .-setPolygon
 	.align	2
 	.global	set_sprite
@@ -416,30 +427,42 @@ set_sprite:
 	.thumb
 	.thumb_func
 	.type	set_background_color, %function
-
 set_background_color:
-    push {lr}                  @ Salvar o registrador de retorno
-    @ Construir dataA usando dataA_builder(0, 0, 0)
-   @ mov r0, #0                 @ opcode = 0
-    
-    @ Construir a cor a partir de R, G, B
-    mov r5, r2                 @ R em r5
-    lsl r5, r5, #3             @ R << 3
-    mov r6, r1                 @ G em r6
-    orr r5, r5, r6             @ R << 3 | G
-    lsl r5, r5, #3             @ (R << 3 | G) << 3
-    mov r6, r0                 @ B em r6
-    orr r5, r5, r6             @ (R << 6 | G << 3) | B -> cor
-
-    mov r0, #0                 @ opcode = 0
-
-    @ Chamar sendInstruction(dataA, color)
-   
-    mov r1, r5                 @ color em r1
-    bl sendInstruction          @ Enviar os dados
-
-    pop {lr}                   @ Restaurar o registrador de retorno
-    bx lr                      @ Retornar da função esse codigo de ARMv7
+	@ args = 0, pretend = 0, frame = 24
+	@ frame_needed = 1, uses_anonymous_args = 0
+	push	{r7, lr}
+	sub	sp, sp, #24
+	add	r7, sp, #0
+	str	r0, [r7, #12]
+	str	r1, [r7, #8]
+	str	r2, [r7, #4]
+	mov	r0, #0
+	mov	r1, #0
+	mov	r2, #0
+	bl	dataA_builder
+	str	r0, [r7, #16]
+	ldr	r3, [r7, #4]
+	str	r3, [r7, #20]
+	ldr	r3, [r7, #20]
+	lsl	r3, r3, #3
+	str	r3, [r7, #20]
+	ldr	r3, [r7, #8]
+	ldr	r2, [r7, #20]
+	orrs	r3, r3, r2
+	str	r3, [r7, #20]
+	ldr	r3, [r7, #20]
+	lsl	r3, r3, #3
+	str	r3, [r7, #20]
+	ldr	r3, [r7, #12]
+	ldr	r2, [r7, #20]
+	orrs	r3, r3, r2
+	str	r3, [r7, #20]
+	ldr	r0, [r7, #16]
+	ldr	r1, [r7, #20]
+	bl	sendInstruction
+	add	r7, r7, #24
+	mov	sp, r7
+	pop	{r7, pc}
 	.size	set_background_color, .-set_background_color
 	.align	2
 	.global	set_background_block
@@ -1025,3 +1048,27 @@ collision:
 	bx	lr
 	.size	collision, .-collision
 	.align	2
+	.global	main
+	.thumb
+	.thumb_func
+	.type	main, %function
+main:
+	@ args = 0, pretend = 0, frame = 0
+	@ frame_needed = 1, uses_anonymous_args = 0
+	push	{r7, lr}
+	add	r7, sp, #0
+	bl	createMappingMemory
+	mov	r3, r0
+	cmp	r3, #-1
+	beq	.L72
+	mov	r0, #0
+	mov	r1, #0
+	mov	r2, #7
+	bl	set_background_color
+.L72:
+	bl	closeMappingMemory
+	mov	r0, r3
+	pop	{r7, pc}
+	.size	main, .-main
+	.ident	"GCC: (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3"
+	.section	.note.GNU-stack,"",%progbits

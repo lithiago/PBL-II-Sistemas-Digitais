@@ -1,4 +1,4 @@
-    .global setPolygon         @ Mantenha o nome consistente
+    @.global setPolygon         @ Mantenha o nome consistente
     .type setPolygon, %function
 
 setPolygon:
