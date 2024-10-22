@@ -26,10 +26,19 @@ RESET_PULSECOUNTER_BASE: .word  0x90
 @ Função createMappingMemory
 
 createMappingMemory:
+    sub sp, sp, #28
+    str r1, [sp, #24]
+    str r2, [sp, #20]
+    str r3, [sp, #16]
+    str r4, [sp, #12]
+    str r5, [sp, #8]
+    str r7, [sp, #4]
+
+    @ Abrir o arquivo /dev/men
     ldr r0, =filename            @ Carrega o endereço do nome do arquivo em r0
     mov r1, #2                   @ Flags de abertura (O_RDWR)
     orr r1, r1, #0x00000080      @ Adiciona O_SYNC (bit 7)
-    mov r7, #5                   @ Número da syscall para open
+    mov r7, sys_open                   @ Número da syscall para open
     svc #0                       @ Chamada de sistema
     movs r4, r0                  @ Armazena o descritor de arquivo em r4
 
@@ -38,12 +47,12 @@ createMappingMemory:
 
     bx lr
     
-/*     ldr r1, =page_len            @ Carrega o tamanho da página
+    ldr r1, =page_len            @ Carrega o tamanho da página
     mov r0, #0                   @ Endereço virtual solicitado (NULL para auto)
     mov r2, #3                   @ PROT_READ | PROT_WRITE
     mov r3, #1                   @ MAP_SHARED
     mov r5, #0                   @ Offset
-    mov r7, #192                 @ Número da syscall para mmap2
+    mov r7, sys_map                 @ Número da syscall para mmap2
     svc #0                       @ Chamada de sistema
     movs r5, r0                  @ Armazena o endereço mapeado em r5
 
@@ -51,7 +60,7 @@ createMappingMemory:
     blt map_failed               @ Salta para map_failed se r0 < 0
 
     bx lr                        @ Retorna da função
- */
+
 open_failed:
     mov r0, #2                   @ Código de erro (1)
     bx lr                        @ Retorna da função

@@ -1,3 +1,10 @@
 {
-    "C_Cpp.errorSquiggles": "enabled"
+    "C_Cpp.errorSquiggles": "enabled",
+    "C_Cpp.dimInactiveRegions": false,
+    "files.associations": {
+        "hps_0.h": "c",
+        "map.h": "c",
+        "*.s": "arm",
+        "opensyscall.h": "c"
+    }
 }
