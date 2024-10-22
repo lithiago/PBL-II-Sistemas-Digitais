@@ -12,7 +12,7 @@ h2p_lw_wrFull_addr: .word 0
 h2p_lw_screen_addr: .word 0
 h2p_lw_result_pulseCounter_addr: .word 0
 fd: .word 0
-HW_REGS_BASE:       .word  0xff200       @ Base address
+HW_REGS_BASE:       .word  0xfc000000       @ Base address
 HW_REGS_SPAN:       .word  0x04000000       @ Span size
 HW_REGS_MASK:       .word  0x03FFFFFF       @ Mask (SPAN - 1)
 ALT_LWFPGASLVS_OFST: .word  0xff200000      @ Offset for FPGA slave address
@@ -36,7 +36,6 @@ createMappingMemory:
     @ Abrir o arquivo /dev/mem
     ldr r0, =filename             @ Carrega o endereço da string "/dev/mem"
     mov r1, #2
-    mov r2, #0                    @ File mode
     mov r7, #5                    @ SC/ Open
     svc 0
 
@@ -51,14 +50,15 @@ createMappingMemory:
 
     @ Configurações para mmap
     mov r0, #0
-    mov r1, #4096      
+    ldr r1, =HW_REGS_SPAN
+    ldr r1, [r1]      
     mov r2, #3               @ PROT_READ | PROT_WRITE
     mov r3, #1               @ MAP_SHARED
     ldr r4, =fd             
     ldr r4, [r4]             
     ldr r5, =HW_REGS_BASE        
     ldr r5, [r5]
-    mov r7, #192             @ SC/ mmap2
+    mov r7, #90             @ SC/ mmap2 = 192; SC/ mmap = 90
     svc 0                 
 
     mov r2, r0               @ Armazena virtual_base em r2
