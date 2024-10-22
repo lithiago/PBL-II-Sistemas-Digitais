@@ -12,7 +12,7 @@ h2p_lw_wrFull_addr: .word 0
 h2p_lw_screen_addr: .word 0
 h2p_lw_result_pulseCounter_addr: .word 0
 fd: .word 0
-HW_REGS_BASE:       .word  0xfc000000       @ Base address
+HW_REGS_BASE:       .word  0xff200       @ Base address
 HW_REGS_SPAN:       .word  0x04000000       @ Span size
 HW_REGS_MASK:       .word  0x03FFFFFF       @ Mask (SPAN - 1)
 ALT_LWFPGASLVS_OFST: .word  0xff200000      @ Offset for FPGA slave address
@@ -51,12 +51,13 @@ createMappingMemory:
 
     @ Configurações para mmap
     mov r0, #0
-    ldr r1, #4096      
+    mov r1, #4096      
     mov r2, #3               @ PROT_READ | PROT_WRITE
     mov r3, #1               @ MAP_SHARED
     ldr r4, =fd             
     ldr r4, [r4]             
-    mov r5, 0xff200        
+    ldr r5, =HW_REGS_BASE        
+    ldr r5, [r5]
     mov r7, #192             @ SC/ mmap2
     svc 0                 
 
