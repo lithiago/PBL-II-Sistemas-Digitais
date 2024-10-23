@@ -86,7 +86,7 @@ int main(){
 	// while(1){ if(isFull() == 0) { set_sprite(sprt_22.data_register, sprt_22.coord_x, sprt_22.coord_y, sprt_22.offset, sprt_22.ativo); break; } }
 	// while(1){ if(isFull() == 0) { set_sprite(sprt_23.data_register, sprt_23.coord_x, sprt_23.coord_y, sprt_23.offset, sprt_23.ativo); break; } }
 	// while(1){ if(isFull() == 0) { set_sprite(sprt_24.data_register, sprt_24.coord_x, sprt_24.coord_y, sprt_24.offset, sprt_24.ativo); break; } }
-	// while(1){ if(isFull() == 0) { set_sprite(sprt_25.data_register, sprt_25.coord_x, sprt_25.coord_y, sprt_25.offset, sprt_25.ativo); break; } }
+	//while(1){ if(isFull() == 0) { set_sprite(sprt_25.data_register, sprt_25.coord_x, sprt_25.coord_y, sprt_25.offset, sprt_25.ativo); break; } }
 	while(1){ if(isFull() == 0) { setPolygon(0b0000, 0b0011, 0b000000111, 0, 0b0001, 100, 100); break; } }
 
 

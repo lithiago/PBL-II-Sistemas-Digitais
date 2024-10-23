@@ -294,3 +294,17 @@ int collision(Sprite *sp1, Sprite *sp2){
 	}
 	return 0;
 }
+
+void setQuadrado(int coluna, int linha, int R, int G, int B){
+    // Ajuste para desenhar um quadrado 4x4
+    for (int i = 0; i < 4; i++){
+        for (int j = 0; j < 4; j++){
+            // Aumenta as coordenadas para o bloco
+            int block_col = (coluna * 4) + j;
+            int block_line = (linha * 4) + i;
+			usleep(1000);
+            // Chama a função para definir o bloco de fundo
+            set_background_block(block_col, block_line, R, G, B);
+        }
+    }
+}

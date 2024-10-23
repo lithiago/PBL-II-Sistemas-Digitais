@@ -40,6 +40,8 @@ void set_sprite(int registrador, int x, int y, int offset, int activation_bit);
 
 void set_background_color(int R, int G, int B);
 
+void setQuadrado(int coluna, int linha, int R, int G, int B);
+
 void set_background_block(int column, int line, int R, int G, int B);
 
 void setPolygon(int address, int opcode, int color, int form, int mult, int ref_point_x, int ref_point_y);
