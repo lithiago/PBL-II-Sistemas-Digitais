@@ -65,62 +65,6 @@ createMappingMemory:
     ldr r3, =virtual_base   
     str r2, [r3]
 
-
-    ldr r0, =ALT_LWFPGASLVS_OFST
-    ldr r0, [r0]
-    ldr r1, =HW_REGS_MASK
-    ldr r1, [r1]
-    ldr r2, =DATA_A_BASE
-    ldr r2, [r2]
-
-    @ Calcular h2p_lw_dataA_addr
-    add r2, r0, r2                @ Soma o offset ALT_LWFPGASLVS_OFST com DATA_A_BASE
-    and r2, r2, r1                @ Aplica a máscara HW_REGS_MASK
-    add r2, r3, r2                @ Armazena o virtual_base + offset calculado em r2
-    ldr r4, =h2p_lw_dataA_addr    @ Carrega o endereço de h2p_lw_dataA_addr
-    str r2, [r4]                  @ Armazena o h2p_lw_dataA_addr no endereço de h2p_lw_dataA_addr
-
-    @ Calcular h2p_lw_dataB_addr
-    ldr r2, =DATA_B_BASE
-    add r2, r0, r2                @ Soma o offset ALT_LWFPGASLVS_OFST com DATA_B_BASE
-    and r2, r2, r1                
-    add r2, r3, r2                
-    ldr r4, =h2p_lw_dataB_addr
-    str r2, [r4]
-
-    @ Calcular h2p_lw_wrReg_addr
-    ldr r2, =WRREG_BASE
-    add r2, r0, r2                @ Soma o offset ALT_LWFPGASLVS_OFST com WRREG_BASE
-    and r2, r2, r1                
-    add r2, r3, r2                
-    ldr r4, =h2p_lw_wrReg_addr
-    str r2, [r4]
-
-    @ Calcular h2p_lw_wrFull_addr
-    ldr r2, =WRFULL_BASE
-    add r2, r0, r2                @ Soma o offset ALT_LWFPGASLVS_OFST com WRFULL_BASE
-    and r2, r2, r1                
-    add r2, r3, r2                
-    ldr r4, =h2p_lw_wrFull_addr
-    str r2, [r4]
-
-
-    @ Calcular h2p_lw_screen_addr
-    ldr r2, =SCREEN_BASE
-    add r2, r0, r2                @ Soma o offset ALT_LWFPGASLVS_OFST com SCREEN_BASE
-    and r2, r2, r1                
-    add r2, r3, r2               
-    ldr r4, =h2p_lw_screen_addr
-    str r2, [r4]
-
-    @ Calcular h2p_lw_result_pulseCounter_addr
-    ldr r2, =RESET_PULSECOUNTER_BASE
-    add r2, r0, r2                @ Soma o offset ALT_LWFPGASLVS_OFST com RESET_PULSECOUNTER_BASE
-    and r2, r2, r1 
-    add r2, r3, r2                
-    ldr r4, =h2p_lw_result_pulseCounter_addr
-    str r2, [r4]
-
     ldr r1, [sp, #24]
     ldr r2, [sp, #20]
     ldr r3, [sp, #16]
@@ -129,12 +73,102 @@ createMappingMemory:
     ldr r7, [sp, #4]
 
     add sp, sp, #24
-    
-    ldr r3, =fd              @ carrega o endereço de fd
-    ldr r0, [r3]             @ carrega o fd
 
     bx lr        
 
 .section .rodata
 filename:
     .asciz "/dev/mem"
+
+
+sendInstruction:
+    @dataA = r0
+    @dataB = r1
+    sub sp, sp, #8
+    str r1, [sp, #4]
+    str r0, [sp, #0]
+
+    ldr r3, =virtual_base
+    ldr r3, [r3]
+
+    loop:
+      @ verifica se wreg esta full
+      ldr r5, =WRFULL_BASE
+      ldr r5, [r5]
+      ldr r4, [r3, r5]
+
+      cmp r4, #0
+      bne loop
+
+
+
+    ldr r4, =DATA_A_BASE
+    ldr r4, [r4]
+    str r0, [r3, r4] @ armazena o valor passado de dataA para o endereço de dataA
+
+    ldr r4, =DATA_B_BASE
+    ldr r4, [r4]
+    str r1, [r3, r4] @ armazena o valor passado de dataA para o endereço de dataA
+
+    mov r3, #1
+    ldr r4, =WRREG_BASE
+    ldr r4, [r4]
+    str r3, [r3, r4] @para abertura e armazenamento do dataA e B
+
+    mov r3, #0
+    ldr r4, =WRREG_BASE
+    ldr r4, [r4]
+    str r3, [r3, r4] @ para abertura e armazenamento do dataA e B
+
+    ldr r1, [sp, #4]
+    ldr r0, [sp, #0]
+    add sp, sp, #8
+
+    bx lr
+
+
+
+set_background_block:
+    @ r0 = column, r1= line, r2 = r, r3 = g, r4 = b
+    sub sp, sp, #20
+    str r0, [sp, #16]
+    str r1, [sp, #12]
+    str r2, [sp, #8]
+    str r3, [sp, #4]
+    str r4, [sp, #0]
+
+    ldr r5, =virtual_base
+    ldr r5, [r5]
+
+    mov r9, #80
+    mul r6, r1, r9
+    add r6, r6, r0 @ r6 = adress
+
+    @ dataA Builder
+    mov r7, #0 @r7 = data
+    orr r7, r7, r6
+    lsl r7, r7, #4
+    orr r7, r4, #2
+
+    @ color = r8
+    mov r8, r4
+    lsl r8, r8, #3
+    orr r8, r8, r3
+    lsl r8, r8, #3
+    orr r8, r8, r2
+
+    mov r0, r7
+    mov r1, r8
+
+    bl sendInstruction
+
+    ldr r0, [sp, #16]
+    ldr r1, [sp, #12]
+    ldr r2, [sp, #8]
+    ldr r3, [sp, #4]
+    ldr r4, [sp, #0]
+
+    add sp, sp, #20
+
+    bx lr
+    
