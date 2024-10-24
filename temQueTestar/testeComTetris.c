@@ -5,9 +5,11 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <fcntl.h>
-#include <intelfpgaup/video.h>
+//#include <intelfpgaup/video.h>
 #include <intelfpgaup/KEY.h>
 #include <time.h>
+#include "graphic_processor.c"
+#include "graphic_processor.h"
 
 #define I2C0_BASE_ADDR 0xFFC04000 // Endereço base do I2C0
 #define IC_CON_OFFSET 0x0         // Deslocamento do registrador ic_con
@@ -50,13 +52,13 @@ int pontos[3] = {0,0,0};
 typedef struct
 {
     bool ocupado[LINHA_TABULEIRO][COLUNA_TABULEIRO]; // Matriz para armazenar o estado das posições
-    short cor[LINHA_TABULEIRO][COLUNA_TABULEIRO];
+    char cor[LINHA_TABULEIRO][COLUNA_TABULEIRO];
 } Tabuleiro;
 
 typedef struct
 {
     int pos_x, pos_y; // Posição relativa do quadrado dentro da peça
-    short cor;        // Cor do quadrado
+    char cor;        // Cor do quadrado
     bool ativo;       // Indica se o quadrado faz parte da peça (ativo ou não)
 } Quadrado;
 
@@ -67,9 +69,9 @@ typedef struct
     Quadrado quadrados[4][4]; // Matriz de quadrados, 4x4 é suficiente para qualquer peça de Tetris
 } Peca;
 
-short corAleatoria()
+char corAleatoria()
 {
-    short cores[] = {video_YELLOW, video_RED, video_GREEN, video_BLUE, video_CYAN, video_GREY, video_ORANGE};
+    char cores[] = {"video_YELLOW", "video_RED", "video_GREEN", "video_BLUE", "video_CYAN", "video_GREY", "video_ORANGE"};
 
     srand(time(NULL)); // Semente para o gerador de números aleatórios
 
@@ -78,10 +80,39 @@ short corAleatoria()
     return cores[numAleatorio];
 }
 
+void converterCorParaRGB(char cor, int* R, int* G, int* B) {
+    switch (cor) {
+    case "video_YELLOW":
+        *R = 1; *G = 1; *B = 0;  // Amarelo
+        break;
+    case "video_RED":
+        *R = 1; *G = 0; *B = 0;    // Vermelho
+        break;
+    case "video_GREEN":
+        *R = 0; *G = 1; *B = 0;    // Verde
+        break;
+    case "video_BLUE":
+        *R = 0; *G = 0; *B = 1;    // Azul
+        break;
+    case "video_CYAN":
+        *R = 0; *G = 1; *B = 1;  // Ciano
+        break;
+    case "video_GREY":
+        *R = 1; *G = 0; *B = 1; // Cinza
+        break;
+    case "video_ORANGE":
+        *R = 1; *G = 0; *B = 0;  // Laranja
+        break;
+    default:
+        *R = 1; *G = 1; *B = 1; // Cor padrão: Branco
+        break;
+    }
+}
+
 Peca criarPecasAleatorias()
 {
     // Define as cores disponíveis para as peças
-    short cor = corAleatoria();
+    char cor = corAleatoria();
 
     // Gera um número aleatório para escolher a peça
     int tipoPeca = rand() % 9;
@@ -191,7 +222,17 @@ void desenhaPeca(Peca peca)
             {
                 int x = peca.pos_x + j * BLOCO_TAM;
                 int y = peca.pos_y + i * BLOCO_TAM;
-                video_box(x, y, x + BLOCO_TAM - 2, y + BLOCO_TAM - 2, peca.quadrados[i][j].cor); // x = pixel de inicio da peça; x + bloco tam = pixel de fim da peça
+
+                 int R, G, B;
+                // Converter a cor da peça para RGB
+                while (1){
+                    if (isFull() == 0){
+                        converterCorParaRGB(peca.quadrados[i][j].cor, &R, &G, &B);
+                        setQuadrado(x, y, R, G, B);
+                        break;
+                    }
+	            }
+                //video_box(x, y, x + BLOCO_TAM - 2, y + BLOCO_TAM - 2, peca.quadrados[i][j].cor); // x = pixel de inicio da peça; x + bloco tam = pixel de fim da peça
             }
         }
     }
@@ -301,7 +342,17 @@ void addPecaNoTabuleiro(Tabuleiro *tabuleiro, Peca peca)
                 // mostra a peça na tela
                 x = peca.pos_x + (j * BLOCO_TAM);
                 y = peca.pos_y + (i * BLOCO_TAM);
-                video_box(x, y, x + BLOCO_TAM - 1, y + BLOCO_TAM - 1, peca.quadrados[i][j].cor);
+
+                int R, G, B;
+                // Converter a cor da peça para RGB
+                while (1){
+                    if (isFull() == 0){
+                        converterCorParaRGB(peca.quadrados[i][j].cor, &R, &G, &B);
+                        setQuadrado(x, y, R, G, B);
+                        break;
+                    }
+                }
+                //video_box(x, y, x + BLOCO_TAM - 1, y + BLOCO_TAM - 1, peca.quadrados[i][j].cor);
             }
         }
     }
@@ -318,14 +369,23 @@ void mostrarAllPecas(Tabuleiro *tab)
             {
                 int x = (j * BLOCO_TAM);
                 int y = (i * BLOCO_TAM);
-                video_box(x, y, x + BLOCO_TAM - 2, y + BLOCO_TAM - 2, tab->cor[i][j]);
+                int R, G, B;
+                // Converter a cor da peça para RGB
+                while (1){
+                    if (isFull() == 0){
+                        converterCorParaRGB(tab->cor[i][j], &R, &G, &B);
+                        setQuadrado(x, y, R, G, B);
+                        break;
+                    }
+	            }
+                //video_box(x, y, x + BLOCO_TAM - 2, y + BLOCO_TAM - 2, tab->cor[i][j]);
             }
         }
 
-        video_box(0, 200, 101, 210, video_GREEN); // desenha o limite do linha - baixo
-        video_box(100, 0, 101, 210, video_GREEN); // desenha o limite da coluna - direita
-        video_box(0, 0, 101, 10, video_GREEN); // desenha o limite da coluna - cima
-        video_box(0, 0, 1, 210, video_GREEN); // desenha o limite da coluna - esquerda
+        //video_box(0, 200, 101, 210, video_GREEN); // desenha o limite do linha - baixo
+        //video_box(100, 0, 101, 210, video_GREEN); // desenha o limite da coluna - direita
+        //video_box(0, 0, 101, 10, video_GREEN); // desenha o limite da coluna - cima
+        //video_box(0, 0, 1, 210, video_GREEN); // desenha o limite da coluna - esquerda
 
     }
 }
@@ -368,53 +428,53 @@ void verificaLinhaCompleta(Tabuleiro *tab) {
     }
 }
 
-// fonte é: big;
-void desenhaText()
-{
-    char nomePause[7][100] = {
-        "     _____    ",
-        "    |  __ \\      ",
-        "    | |__| |_ _ _   _ ___  ___ ",
-        "    |  ___/ _` | | | / __|/ _ \\ ",
-        "    | |  | |_| | |_| \\__ \\  __/ ",
-        "    |_|   \\__,_|\\__,_|___/\\___| ",
-        "                                ",
-    };
+// // fonte é: big;
+// void desenhaText()
+// {
+//     char nomePause[7][100] = {
+//         "     _____    ",
+//         "    |  __ \\      ",
+//         "    | |__| |_ _ _   _ ___  ___ ",
+//         "    |  ___/ _` | | | / __|/ _ \\ ",
+//         "    | |  | |_| | |_| \\__ \\  __/ ",
+//         "    |_|   \\__,_|\\__,_|___/\\___| ",
+//         "                                ",
+//     };
 
-    int i = 0;
-    for (i; i < 7; i++)
-    {
-        video_text(30, 20 + i, nomePause[i]); // Desenha o caractere
-    }
-}
+//     int i = 0;
+//     for (i; i < 7; i++)
+//     {
+//         video_text(30, 20 + i, nomePause[i]); // Desenha o caractere
+//     }
+// }
 
-void desenhaFimDoJogo()
-{
-    char nomePause[13][100] = {
-        "        _____                      ",
-        "       / ____|                     ",
-        "      | |  __  __ _ _ __ ___   ___ ",
-        "      | | |_ |/ _` | '_ ` _ \\ / _ \\",
-        "      | |__| | |_| | | | | | |  __/",
-        "      |_____|\\__,_|_| |_| |_|\\___|",
-        "                                     ",
-        "          ____                 ",
-        "         / __ |                ",
-        "        | |  | |_   _____ _ __ ",
-        "        | |  | | \\ / / _ \\ '__|",
-        "        | |__| \\ V /  __/ |   ",
-        "        \\____/  \\_/ \\___|_|   ",
-    };
+// void desenhaFimDoJogo()
+// {
+//     char nomePause[13][100] = {
+//         "        _____                      ",
+//         "       / ____|                     ",
+//         "      | |  __  __ _ _ __ ___   ___ ",
+//         "      | | |_ |/ _` | '_ ` _ \\ / _ \\",
+//         "      | |__| | |_| | | | | | |  __/",
+//         "      |_____|\\__,_|_| |_| |_|\\___|",
+//         "                                     ",
+//         "          ____                 ",
+//         "         / __ |                ",
+//         "        | |  | |_   _____ _ __ ",
+//         "        | |  | | \\ / / _ \\ '__|",
+//         "        | |__| \\ V /  __/ |   ",
+//         "        \\____/  \\_/ \\___|_|   ",
+//     };
 
-    int i = 0;
-    for (i; i < 13; i++)
-    {
-        video_text(30, 20 + i, nomePause[i]); // Desenha o caractere
-    }
+//     int i = 0;
+//     for (i; i < 13; i++)
+//     {
+//         video_text(30, 20 + i, nomePause[i]); // Desenha o caractere
+//     }
 
-   // sprintf(str, "Score: %d", score); // Atualiza a pontuação e exibe em terminal
-   // video_text(50, 20, str);           // Exibe a pontuação
-}
+//    // sprintf(str, "Score: %d", score); // Atualiza a pontuação e exibe em terminal
+//    // video_text(50, 20, str);           // Exibe a pontuação
+// }
 
 bool reiniciarGame(Tabuleiro *tabuleiro, Peca peca)
 {
@@ -441,23 +501,23 @@ bool reiniciarGame(Tabuleiro *tabuleiro, Peca peca)
 int main()
 {
     int jogadas = 0;
-    int fd;
+    int fd1;
     void *i2c_base;
 
     // Abrir /dev/mem para acessar a memória do sistema
-    fd = open("/dev/mem", O_RDWR | O_SYNC);
-    if (fd == -1)
+    fd1 = open("/dev/mem", O_RDWR | O_SYNC);
+    if (fd1 == -1)
     {
         perror("Erro ao abrir /dev/mem");
         return -1;
     }
 
     // Mapear a memória do controlador I2C0
-    i2c_base = mmap(NULL, MAP_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, I2C0_BASE_ADDR);
+    i2c_base = mmap(NULL, MAP_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd1, I2C0_BASE_ADDR);
     if (i2c_base == MAP_FAILED)
     {
         perror("Erro ao mapear a memória do I2C");
-        close(fd);
+        close(fd1);
         return -1;
     }
 
@@ -479,15 +539,17 @@ int main()
     *((uint32_t *)(i2c_base + IC_ENABLE_REG)) = 0x1;
     printf("I2C habilitado\n");
 
-    video_open();
-    video_clear();
+    //video_open();
+    //video_clear();
+    createMappingMemory();
+
 
     Tabuleiro tab;
     iniTabuleiro(&tab);
 
     Peca peca = criarPecasAleatorias();
 
-    video_show();
+    //video_show();
 
     int pause;
     int valor = 1;
@@ -495,7 +557,7 @@ int main()
 
     while (1)
     {
-        video_erase();
+        //video_erase();
         while (!verificarColisao(&tab, peca))
         {
             usleep(500000 + velocidade);
@@ -508,20 +570,20 @@ int main()
 
             if (valor == 1)
             {
-                video_erase();
-                sprintf(str, "Score: %d", score); // Atualiza a pontuação e exibe em terminal
-                video_text(50, 5, str);           // Exibe a pontuação
+                //video_erase();
+                // sprintf(str, "Score: %d", score); // Atualiza a pontuação e exibe em terminal
+                // video_text(50, 5, str);           // Exibe a pontuação
 
-                pontos[jogadas] = score;
+                // pontos[jogadas] = score;
 
-                sprintf(str1, "Jogador 1: %d", pontos[0]); // Atualiza a pontuação e exibe em terminal
-                video_text(50, 7, str1);           // Exibe a pontuação
+                // sprintf(str1, "Jogador 1: %d", pontos[0]); // Atualiza a pontuação e exibe em terminal
+                // video_text(50, 7, str1);           // Exibe a pontuação
 
-                sprintf(str2, "Jogador 2: %d", pontos[1]); // Atualiza a pontuação e exibe em terminal
-                video_text(50, 9, str2);           // Exibe a pontuação
+                // sprintf(str2, "Jogador 2: %d", pontos[1]); // Atualiza a pontuação e exibe em terminal
+                // video_text(50, 9, str2);           // Exibe a pontuação
 
-                sprintf(str3, "Jogador 3: %d", pontos[2]); // Atualiza a pontuação e exibe em terminal
-                video_text(50, 11, str3);           // Exibe a pontuação
+                // sprintf(str3, "Jogador 3: %d", pontos[2]); // Atualiza a pontuação e exibe em terminal
+                // video_text(50, 11, str3);           // Exibe a pontuação
 
 
                 // Escrever no IC_DATA_CMD para solicitar a leitura dos dados de X, Y, Z
@@ -567,16 +629,16 @@ int main()
                     moverDirOuEsq(&tab, &peca, 10);
                 } // move para a direita
 
-                video_clear();
+                //video_clear();
 
                 desenhaPeca(peca);
                 mostrarAllPecas(&tab);
 
-                video_show();
+                //video_show();
             }
             else
             {
-                desenhaText();
+                //desenhaText();
                 KEY_read(&pause);
                 if (pause != 0)
                 {
@@ -596,7 +658,7 @@ int main()
 
             while (1)
             {
-                desenhaFimDoJogo();
+                //desenhaFimDoJogo();
                 //video_erase();
                 KEY_read(&pause);
                 if (pause != 0)
@@ -619,15 +681,17 @@ int main()
         }
     }
 
-    video_close();
+    //video_close();
 
     // Desabilitar o I2C0 após a operação
     *((uint32_t *)(i2c_base + IC_ENABLE_REG)) = 0x0;
     printf("I2C desabilitado\n");
 
+    closeMappingMemory();
+
     // Desmapear a memória e fechar o arquivo de memória
     munmap(i2c_base, MAP_SIZE);
-    close(fd);
+    close(fd1);
 
     return 0;
 }
