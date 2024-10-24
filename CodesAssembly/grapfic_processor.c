@@ -52,7 +52,7 @@ void closeMappingMemory(){
 Function to verifies if the FIFO is full.
 ===================================================================================*/
 int isFull(){
-	return *(uint32_t *) h2p_lw_wrFull_addr;
+		return *(uint32_t *) h2p_lw_wrFull_addr;
 }
 
 void sendInstruction(unsigned long dataA, unsigned long dataB){
