@@ -124,7 +124,7 @@ set_background_block:
     @ r0 = column, r1= line, r2 = r, r3 = g, sp+4 = b; se tiver outro, o b estará em sp+8 e o novo em sp+4
     push {r4-r8,lr}
 
-    ldr r4, [sp, #16]
+    ldr r4, [sp, #4]
 
     ldr r5, =virtual_base
     ldr r5, [r5]
