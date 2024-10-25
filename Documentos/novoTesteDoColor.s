@@ -100,14 +100,12 @@ sendInstruction:
     str r1, [r3, r4] @ armazena o valor passado de dataA para o endereço de dataA
 
     mov r2, #1
-    mov r4, #0xc0
 
-    str r2, [r3, r4] @para abertura e armazenamento do dataA e B
+    str r2, [r3, #0xc0] @para abertura e armazenamento do dataA e B
 
     mov r2, #0
-    mov r4, #0xc0
 
-    str r2, [r3, r4] @ para abertura e armazenamento do dataA e B
+    str r2, [r3, #0xc0] @ para abertura e armazenamento do dataA e B
 
     pop {r4, lr}
     bx lr
@@ -119,12 +117,9 @@ sendInstruction:
 
 set_background_block:
     @ r0 = column, r1= line, r2 = r, r3 = g, sp+4 = b; se tiver outro, o b estará em sp+8 e o novo em sp+4
-    push {r4-r7,lr}
+    push {r4-r6,lr}
 
-    ldr r4, [sp, #4]
-
-    ldr r5, =virtual_base
-    ldr r5, [r5]
+    ldr r4, [sp, #16]
 
     mov r6, #80
     mul r6, r1, r6
@@ -132,7 +127,7 @@ set_background_block:
 
     @ dataA Builder
     lsl r6, r6, #4
-    add r6, r6, #2
+    orr r6, r6, #2
 
     @ color = r4
     lsl r4, r4, #3
@@ -145,6 +140,6 @@ set_background_block:
 
     bl sendInstruction
 
-    pop {r4-r7,lr}
+    pop {r4-r6,lr}
     bx lr
     
