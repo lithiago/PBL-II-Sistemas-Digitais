@@ -1,5 +1,3 @@
-
-
 .align 2
 .data
 virtual_base: .word 0
@@ -29,34 +27,33 @@ RESET_PULSECOUNTER_BASE: .word  0x90
 createMappingMemory:
     push {r4-r7, lr}
 
-    @ Abrir o arquivo /dev/mem
-    ldr r0, =filename             @ Carrega o endereço da string "/dev/mem"
+    ldr r0, =filename @ carrega o endereço da string "/dev/mem"
     mov r1, #2
-    mov r2, #0                    @ File mode
-    mov r7, #5                    @ SC/ Open
+    mov r2, #0 @ file mode
+    mov r7, #5 @ SC/ Open
     svc 0
 
-    mov r2, r0                    @ Armazena o fd em r2
+    mov r2, r0 @ armazena o fd em r2
 
-    @ Carregar endereço de fd
-    ldr r3, =fd              @ Carrega o endereço de fd
-    str r2, [r3]             @ Armazena o fd no endereço de fd
+    @ carrega endereço de fd
+    ldr r3, =fd
+    str r2, [r3]
 
-    @ Configurações para mmap
+    @ config para mmap
     mov r0, #0
     mov r1, #4096      
-    mov r2, #3               @ PROT_READ | PROT_WRITE
-    mov r3, #1               @ MAP_SHARED
+    mov r2, #3 @ PROT_READ | PROT_WRITE
+    mov r3, #1 @ MAP_SHARED
     ldr r4, =fd             
     ldr r4, [r4]             
     ldr r5, =HW_REGS_BASE        
     ldr r5, [r5]
-    mov r7, #192             @ SC/ mmap2
+    mov r7, #192 @ SC/ mmap2
     svc 0                 
 
-    mov r2, r0               @ Armazena virtual_base em r2
+    mov r2, r0 @ armazena virtual_base em r2
 
-    @ Carregar endereço e armazenar o valor de virtual_base
+    @ carrega endereço e armazena o valor de virtual_base
     ldr r3, =virtual_base   
     str r2, [r3]
 
