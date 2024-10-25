@@ -28,6 +28,16 @@
 // Registradores internos do ADXL345
 #define ADXL345_REG_DATA_X0 0x32 // Registrador inicial dos dados X, Y, Z (6 bytes)
 
+#define SYSMGR_GENERALIO7 ((volatile unsigned int *) 0xFFD0849C)
+#define SYSMGR_GENERALIO8 ((volatile unsigned int *) 0xFFD084A0)
+#define SYSMGR_I2C0USEFPGA ((volatile unsigned int *) 0xFFD08704)
+
+void configure_pinmux(){
+    *SYSMGR_I2C0USEFPGA = 0;
+    *SYSMGR_GENERALIO7 = 1;
+    *SYSMGR_GENERALIO8 = 1;
+}
+
 // Logica do game
 #define BLOCO_TAM 10
 #define LARGURA_TELA 300
@@ -95,10 +105,18 @@ void limpa(){
 					//usleep(10);
             		// Chama a função para definir o bloco de fundo
             		set_background_block(block_col, block_line, 0b000, 0b000, 0b000);
+                    if (j == 20 && i <= 40) {
+                        set_background_block(block_col, block_line, 0b111, 0b000, 0b000); //encontro da coluna e linha
+                    }
+
+                    if (i == 40 && j <= 20) {
+                        set_background_block(block_col, block_line, 0b111, 0b000, 0b000); //encontro da coluna e linha
+                    }
 					break;
 			}
 		}
 	}
+
 }
 
 int corAleatoria()
@@ -271,71 +289,9 @@ void limpaPeca(Peca peca)
         }
     }
 }
-// void limpaPeca(Peca peca)
-// {
-//     for (int i = 0; i < 10; i++)
-//     {
-//         for (int j = 0; j < 10; j++)
-//         {
-//             if (peca.quadrados[i][j].ativo)
-//             {
-//                 //int x = peca.pos_x + j * BLOCO_TAM;
-//                 //int y = peca.pos_y + i * BLOCO_TAM;
-//                 int x = peca.prev_pos_x / BLOCO_TAM + j;
-//                 int y = peca.prev_pos_y / BLOCO_TAM + i;
-//                 //int R, G, B;
-//                 // Converter a cor da peça para RGB
-//                 //while (1){
-//                   //  if (isFull() == 0){
-//                        // converterCorParaRGB(peca.quadrados[i][j].cor, &R, &G, &B);
-//                         setQuadrado(x, y, 0b000, 0b000, 0b000);
-//                     //    break;
-//                    // }
-// 	           // }
-//                 //video_box(x, y, x + BLOCO_TAM - 2, y + BLOCO_TAM - 2, peca.quadrados[i][j].cor); // x = pixel de inicio da peça; x + bloco tam = pixel de fim da peça
-//             }
-//         }
-//     }
-// }
 
-// void desenhaPeca(Peca peca)
-// {   
-//     limpaPeca(peca);
-//     //usleep(1000);
-//     //limpa();
-//     peca -> prev_pos_x = peca -> pos_x;
-//     peca -> prev_pos_y = peca -> pos_y;
-//     for (int i = 0; i < 4; i++)
-//     {
-//         for (int j = 0; j < 4; j++)
-//         {
-//             if (peca.quadrados[i][j].ativo)
-//             {
-//                 //int x = peca.pos_x + j * BLOCO_TAM;
-//                 //int y = peca.pos_y + i * BLOCO_TAM;
-//                 int x = peca.pos_x / BLOCO_TAM + j;
-//                 int y = peca.pos_y / BLOCO_TAM + i;
-//                 int R, G, B;
-//                 // Converter a cor da peça para RGB
-//                 while (1){
-//                     if (isFull() == 0){
-//                         converterCorParaRGB(peca.quadrados[i][j].cor, &R, &G, &B);
-//                         setQuadrado(x, y, R, G, B);
-//                         break;
-//                     }
-// 	            }
-//                 //video_box(x, y, x + BLOCO_TAM - 2, y + BLOCO_TAM - 2, peca.quadrados[i][j].cor); // x = pixel de inicio da peça; x + bloco tam = pixel de fim da peça
-//             }
-//         }
-//     }
-// }
 void desenhaPeca(Peca peca)
 {   
-    
-
-    //limpaPeca(peca);
-    //usleep(1000);
-    //limpa();
     for (int i = 0; i < 4; i++)
     {
         for (int j = 0; j < 4; j++)
@@ -348,11 +304,11 @@ void desenhaPeca(Peca peca)
                 int y = peca.pos_y / BLOCO_TAM + i;
                 int R, G, B;
                 // Converter a cor da peça para RGB
-                while (1){
+               // while (1){
                         converterCorParaRGB(peca.quadrados[i][j].cor, &R, &G, &B);
                         setQuadrado(x, y, R, G, B);
-                        break;
-	            }
+                     //   break;
+	            //}
                 //video_box(x, y, x + BLOCO_TAM - 2, y + BLOCO_TAM - 2, peca.quadrados[i][j].cor); // x = pixel de inicio da peça; x + bloco tam = pixel de fim da peça
             }
         }
@@ -472,13 +428,16 @@ void addPecaNoTabuleiro(Tabuleiro *tabuleiro, Peca peca)
             {
                 int x = (peca.pos_y / BLOCO_TAM) + i;
                 int y = (peca.pos_x / BLOCO_TAM) + j;
+                printf("\n\n\npos x apos fixar: x: %d", x);
+                printf("\n\n\npos y apos fixar: x: %d", y);
+
 
                 tabuleiro->ocupado[x][y] = true;
                 tabuleiro->cor[x][y] = peca.quadrados[i][j].cor;
 
                 // mostra a peça na tela
-                x = peca.pos_x + (j * BLOCO_TAM);
-                y = peca.pos_y + (i * BLOCO_TAM);
+                 x = peca.pos_x + (j * BLOCO_TAM);
+                 y = peca.pos_y + (i * BLOCO_TAM);
 
                 int R, G, B;
                 // Converter a cor da peça para RGB
@@ -512,22 +471,16 @@ void mostrarAllPecas(Tabuleiro *tab)
                 //int y = peca.pos_y / BLOCO_TAM + i;
                 int R, G, B;
                 // Converter a cor da peça para RGB
-                while (1){
+                //while (1){
 
                         converterCorParaRGB(tab->cor[i][j], &R, &G, &B);
                         setQuadrado(x, y, R, G, B);
-                        break;
+                       // break;
 
-	            }
+	            //}
                 //video_box(x, y, x + BLOCO_TAM - 2, y + BLOCO_TAM - 2, tab->cor[i][j]);
             }
         }
-
-        //video_box(0, 200, 101, 210, video_GREEN); // desenha o limite do linha - baixo
-        //video_box(100, 0, 101, 210, video_GREEN); // desenha o limite da coluna - direita
-        //video_box(0, 0, 101, 10, video_GREEN); // desenha o limite da coluna - cima
-        //video_box(0, 0, 1, 210, video_GREEN); // desenha o limite da coluna - esquerda
-
     }
 }
 
@@ -568,54 +521,6 @@ void verificaLinhaCompleta(Tabuleiro *tab) {
         }
     }
 }
-
-// // fonte é: big;
-// void desenhaText()
-// {
-//     char nomePause[7][100] = {
-//         "     _____    ",
-//         "    |  __ \\      ",
-//         "    | |__| |_ _ _   _ ___  ___ ",
-//         "    |  ___/ _` | | | / __|/ _ \\ ",
-//         "    | |  | |_| | |_| \\__ \\  __/ ",
-//         "    |_|   \\__,_|\\__,_|___/\\___| ",
-//         "                                ",
-//     };
-
-//     int i = 0;
-//     for (i; i < 7; i++)
-//     {
-//         video_text(30, 20 + i, nomePause[i]); // Desenha o caractere
-//     }
-// }
-
-// void desenhaFimDoJogo()
-// {
-//     char nomePause[13][100] = {
-//         "        _____                      ",
-//         "       / ____|                     ",
-//         "      | |  __  __ _ _ __ ___   ___ ",
-//         "      | | |_ |/ _` | '_ ` _ \\ / _ \\",
-//         "      | |__| | |_| | | | | | |  __/",
-//         "      |_____|\\__,_|_| |_| |_|\\___|",
-//         "                                     ",
-//         "          ____                 ",
-//         "         / __ |                ",
-//         "        | |  | |_   _____ _ __ ",
-//         "        | |  | | \\ / / _ \\ '__|",
-//         "        | |__| \\ V /  __/ |   ",
-//         "        \\____/  \\_/ \\___|_|   ",
-//     };
-
-//     int i = 0;
-//     for (i; i < 13; i++)
-//     {
-//         video_text(30, 20 + i, nomePause[i]); // Desenha o caractere
-//     }
-
-//    // sprintf(str, "Score: %d", score); // Atualiza a pontuação e exibe em terminal
-//    // video_text(50, 20, str);           // Exibe a pontuação
-// }
 
 bool reiniciarGame(Tabuleiro *tabuleiro, Peca peca)
 {
@@ -714,22 +619,6 @@ int main()
 
             if (valor == 1)
             {
-                //video_erase();
-                // sprintf(str, "Score: %d", score); // Atualiza a pontuação e exibe em terminal
-                // video_text(50, 5, str);           // Exibe a pontuação
-
-                // pontos[jogadas] = score;
-
-                // sprintf(str1, "Jogador 1: %d", pontos[0]); // Atualiza a pontuação e exibe em terminal
-                // video_text(50, 7, str1);           // Exibe a pontuação
-
-                // sprintf(str2, "Jogador 2: %d", pontos[1]); // Atualiza a pontuação e exibe em terminal
-                // video_text(50, 9, str2);           // Exibe a pontuação
-
-                // sprintf(str3, "Jogador 3: %d", pontos[2]); // Atualiza a pontuação e exibe em terminal
-                // video_text(50, 11, str3);           // Exibe a pontuação
-
-
                 // Escrever no IC_DATA_CMD para solicitar a leitura dos dados de X, Y, Z
                 // Enviar o registrador de início de leitura (0x32 - registrador de dados do ADXL345)
                 *((uint32_t *)(i2c_base + IC_DATA_CMD_REG)) = ADXL345_REG_DATA_X0;
@@ -754,7 +643,6 @@ int main()
                     accel_data[i] = (int16_t)((high_byte << 8) | low_byte); // Combinar os dois bytes
                 }
 
-                // accel_read(&acel_rdy, &acel_tap, &acel_dtap, &acel_x, &acel_y, &acel_z, &acel_mg);
                 printf("\n------------------------------------\n");
                 printf("Aceleração em X: %d\n", accel_data[0]);
                 printf("Aceleração em Y: %d\n", accel_data[1]);
@@ -764,28 +652,19 @@ int main()
                 desenhaPeca(peca);
 
                 moverPeca(&peca, 10); // move para baixo
-                if (accel_data[0] < -5)
+                if (accel_data[0] < -20)
                 {
                     moverDirOuEsq(&tab, &peca, -10);
                 } // move para a esquerda
-                else if (accel_data[0] > 5)
+                else if (accel_data[0] > 20)
                 {
                     moverDirOuEsq(&tab, &peca, 10);
                 } // move para a direita
                 limpa();
-
-                
-
-                //video_clear();
-
                 desenhaPeca(peca);
-
-                
-                //limpaPeca(anterior);
 
                 mostrarAllPecas(&tab);
 
-                //video_show();
             }
             // else
             // {
@@ -831,7 +710,10 @@ int main()
 
         //     iniTabuleiro(&tab); // reinicia o tabuleiro ao apertar o botão
         // }
+        //limpa();
+    //mostrarAllPecas(&tab);
     }
+    
 
     //video_close();
 
