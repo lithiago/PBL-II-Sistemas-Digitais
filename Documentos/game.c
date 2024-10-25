@@ -662,6 +662,8 @@ int main()
                 } // move para a direita
                 limpa();
                 desenhaPeca(peca);
+                printf("\n\n\npos x: %d", peca.pos_x);
+                printf("\n\n\npos y: %d", peca.pos_y);
 
                 mostrarAllPecas(&tab);
 
