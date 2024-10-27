@@ -768,7 +768,7 @@ int main()
     *((uint32_t *)(i2c_base + IC_ENABLE_REG)) = 0x0;
     printf("I2C desabilitado\n");
 
-    closeMappingMemory();
+    //closeMappingMemory();
 
     // Desmapear a memória e fechar o arquivo de memória
     munmap(i2c_base, MAP_SIZE);
