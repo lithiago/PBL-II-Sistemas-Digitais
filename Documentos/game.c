@@ -310,14 +310,11 @@ void desenhaPeca(Peca peca)
         {
             if (peca.quadrados[i][j].ativo)
             {
-                //int x = peca.pos_x + j * BLOCO_TAM;
-                //int y = peca.pos_y + i * BLOCO_TAM;
                 int x = peca.pos_x / BLOCO_TAM + j;
                 int y = peca.pos_y / BLOCO_TAM + i;
                 int R, G, B;
                 converterCorParaRGB(peca.quadrados[i][j].cor, &R, &G, &B);
                 setQuadrado(x, y, R, G, B); //x = coluna; y = linha
-                //video_box(x, y, x + BLOCO_TAM - 2, y + BLOCO_TAM - 2, peca.quadrados[i][j].cor); // x = pixel de inicio da peça; x + bloco tam = pixel de fim da peça
             }
         }
     }
@@ -435,7 +432,6 @@ void addPecaNoTabuleiro(Tabuleiro *tabuleiro, Peca peca)
                 int R, G, B;
                 converterCorParaRGB(peca.quadrados[i][j].cor, &R, &G, &B);
                 setQuadrado(y, x, R, G, B); //x = linha; y = coluna
-                //video_box(x, y, x + BLOCO_TAM - 1, y + BLOCO_TAM - 1, peca.quadrados[i][j].cor);
             }
         }
     }
@@ -453,24 +449,14 @@ void mostrarAllPecas(Tabuleiro *tab)
             // faz com que mostre na tela as posições que já estão ativas no tabuleiro
             if (tab->ocupado[i][j] == true)
             {
-                //int x = (j * BLOCO_TAM);
-                //int y = (i * BLOCO_TAM);
                 int x = j;
                 int y = i;
-                //int x = peca.pos_x / BLOCO_TAM + j;
-                //int y = peca.pos_y / BLOCO_TAM + i;
 
                 int R, G, B;
                 converterCorParaRGB(tab->cor[i][j], &R, &G, &B);
                 setQuadrado(x, y, R, G, B);
-                //video_box(x, y, x + BLOCO_TAM - 2, y + BLOCO_TAM - 2, tab->cor[i][j]);
             }
         }
-        //video_box(0, 200, 101, 210, video_GREEN); // desenha o limite do linha - baixo
-        //video_box(100, 0, 101, 210, video_GREEN); // desenha o limite da coluna - direita
-        //video_box(0, 0, 101, 10, video_GREEN); // desenha o limite da coluna - cima
-        //video_box(0, 0, 1, 210, video_GREEN); // desenha o limite da coluna - esquerda
-
     }
 }
 
@@ -761,8 +747,6 @@ int main()
         mostrarAllPecas(&tab);
     }
     
-
-    //video_close();
 
     // Desabilitar o I2C0 após a operação
     *((uint32_t *)(i2c_base + IC_ENABLE_REG)) = 0x0;
