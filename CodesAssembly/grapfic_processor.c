@@ -125,6 +125,36 @@ void set_background_color(int R, int G, int B){
 	sendInstruction(dataA, color);
 }
 
+static unsigned long dataA_builder(int opcode, int reg, int memory_address){
+	unsigned long data = 0;
+	switch(opcode){
+		case(0):
+			data = data | reg;                  
+			data = data << 4;                   
+			data = data | opcode;               
+			break;
+		case(1):
+		case(2):
+		case(3):
+			data = data | memory_address;   
+			data = data << 4;      
+			data = data | opcode;
+			break;
+	}
+	return data;
+}
+
+
+void sendInstruction(unsigned long dataA, unsigned long dataB){
+	if(isFull() == 0){
+		*(uint32_t *) h2p_lw_wrReg_addr = 0;
+		*(uint32_t *) h2p_lw_dataA_addr = dataA;
+		*(uint32_t *) h2p_lw_dataB_addr = dataB;
+		*(uint32_t *) h2p_lw_wrReg_addr = 1;
+		*(uint32_t *) h2p_lw_wrReg_addr = 0;	
+	}
+}
+
 void set_background_block(int column, int line, int R, int G, int B){
 	int address = (line * 80) + column;
 	unsigned long dataA = dataA_builder(2, 0, address);
