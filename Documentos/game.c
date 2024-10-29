@@ -126,7 +126,7 @@ void limpaDevagar(){
 			while(1){
 					int block_col =  j;
             		int block_line = i;
-					usleep(10000);
+					usleep(1000);
             		// Chama a função para definir o bloco de fundo
             		set_background_block(block_col, block_line, 0, 0, 0);                     
 					break;
@@ -523,8 +523,8 @@ bool reiniciarGame(Tabuleiro *tabuleiro, Peca peca)
 /********************************************************
 Desenha a tela inicial "tetris" e a tela de "game over"
 *********************************************************/
-void desenha(int matriz[10][25]){
-    for (int i = 0; i < 10; i++){
+void desenha(int matriz[12][25]){
+    for (int i = 0; i < 12; i++){
         for (int j = 0; j < 25; j++){
             // Aumenta as coordenadas para o bloco
             if (matriz[i][j] == 1){
@@ -533,7 +533,8 @@ void desenha(int matriz[10][25]){
                 int R, G, B;
                 int cor = corAleatoria();
                 converterCorParaRGB(cor, &R, &G, &B);
-                set_background_block(block_col, block_line, R, G, B);
+                setQuadrado(block_col, block_line, R, G, B);
+                //set_background_block(block_col, block_line, R, G, B);
             }            
 			//usleep(1500);
         }
@@ -543,8 +544,10 @@ void desenha(int matriz[10][25]){
 int main()
 {   
 
+    //configure_pinmux();
+
     //tela inicial com o nome "tetris"
-    int tetris[10][25] = {
+    int tetris[12][25] = {
         {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
         {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
         {1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1},
@@ -554,11 +557,14 @@ int main()
         {1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1},
         {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
         {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+
     };
 
     //tela de fim de jogo com o nome "game over"
-    int gameOver[10][25] = {
+    int gameOver[12][25] = {
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1},
         {0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1},
@@ -570,7 +576,9 @@ int main()
         {0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0},
         {0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1},
         {0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0}
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}    
     };
 
 
@@ -626,9 +634,9 @@ int main()
     //KEY_open();
     limpaTudo();
     desenha(tetris);
-    sleep(10);
+    sleep(5);
     limpaDevagar();
-    limpa();
+    //limpa();
     while (1)
     {
         while (!verificarColisao(&tab, peca))
@@ -716,10 +724,10 @@ int main()
 
                 limpaTudo();
                 desenha(gameOver);
-                sleep(10);
+                sleep(5);
                 limpaDevagar();
                 desenha(tetris);
-                sleep(10);
+                sleep(5);
                 limpaDevagar();
 
                 //KEY_read(&pause);
@@ -752,7 +760,7 @@ int main()
     *((uint32_t *)(i2c_base + IC_ENABLE_REG)) = 0x0;
     printf("I2C desabilitado\n");
 
-    //closeMappingMemory();
+    closeMappingMemory();
 
     // Desmapear a memória e fechar o arquivo de memória
     munmap(i2c_base, MAP_SIZE);
