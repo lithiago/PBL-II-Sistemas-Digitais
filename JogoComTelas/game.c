@@ -100,8 +100,8 @@ Funçoes para limpar a tela utilizando a funçao "set_background_block" da nossa
 
 *******************************************************************************/
 void limpa(){
-	for (int i = 0; i < 40; i++){
-		for (int j = 0; j < 40; j++){
+	for (int i = 0; i < 41; i++){
+		for (int j = 0; j < 41; j++){
 			while(1){
 					int block_col =  j;
             		int block_line = i;
@@ -109,10 +109,10 @@ void limpa(){
             		// Chama a função para definir o bloco de fundo
             		set_background_block(block_col, block_line, 0, 0, 0);
                      if (j == 20 && i <= 40) {
-                        set_background_block(block_col, block_line, 0b111, 0b000, 0b000); //encontro da coluna e linha
+                        set_background_block(block_col, block_line, 0b000, 0b011, 0b000); //encontro da coluna e linha
                     }
                     if (i == 40 && j <= 20) {
-                        set_background_block(block_col, block_line, 0b111, 0b000, 0b000); //encontro da coluna e linha
+                        set_background_block(block_col, block_line, 0b000, 0b011, 0b000); //encontro da coluna e linha
                     }
 					break;
 			}
@@ -126,7 +126,7 @@ void limpaDevagar(){
 			while(1){
 					int block_col =  j;
             		int block_line = i;
-					usleep(10000);
+					usleep(1000);
             		// Chama a função para definir o bloco de fundo
             		set_background_block(block_col, block_line, 0, 0, 0);                     
 					break;
@@ -208,7 +208,7 @@ Peca criarPecasAleatorias()
     peca.pos_x = (60) - (BLOCO_TAM * 1); // Centraliza a peça
     peca.pos_y = 0;                      // Começa no topo da tela
     peca.tam_x = 4;                      // Dimensão máxima 4x4 para qualquer peça
-    peca.tam_y = 4;                      // TESTAR SEM
+    peca.tam_y = 4;
 
     // Inicializa a matriz de quadrados como inativa
     for (int i = 0; i < 4; i++)
@@ -310,14 +310,11 @@ void desenhaPeca(Peca peca)
         {
             if (peca.quadrados[i][j].ativo)
             {
-                //int x = peca.pos_x + j * BLOCO_TAM;
-                //int y = peca.pos_y + i * BLOCO_TAM;
                 int x = peca.pos_x / BLOCO_TAM + j;
                 int y = peca.pos_y / BLOCO_TAM + i;
                 int R, G, B;
                 converterCorParaRGB(peca.quadrados[i][j].cor, &R, &G, &B);
-                setQuadrado(x, y, R, G, B);
-                //video_box(x, y, x + BLOCO_TAM - 2, y + BLOCO_TAM - 2, peca.quadrados[i][j].cor); // x = pixel de inicio da peça; x + bloco tam = pixel de fim da peça
+                setQuadrado(x, y, R, G, B); //x = coluna; y = linha
             }
         }
     }
@@ -422,20 +419,19 @@ void addPecaNoTabuleiro(Tabuleiro *tabuleiro, Peca peca)
             // faz com que marque como true no tabuleiro
             if (i < 4 && j < 4 && peca.quadrados[i][j].ativo)
             {
-                int x = (peca.pos_y / BLOCO_TAM) + i;
+                int x = (peca.pos_y / BLOCO_TAM) + i; //x = linha; y = coluna
                 int y = (peca.pos_x / BLOCO_TAM) + j;
 
                 tabuleiro->ocupado[x][y] = true;
                 tabuleiro->cor[x][y] = peca.quadrados[i][j].cor;
 
                 // mostra a peça na tela
-                x = peca.pos_x + (j * BLOCO_TAM);
-                y = peca.pos_y + (i * BLOCO_TAM);
+                // x = peca.pos_x + (j * BLOCO_TAM);
+                // y = peca.pos_y + (i * BLOCO_TAM);
 
                 int R, G, B;
                 converterCorParaRGB(peca.quadrados[i][j].cor, &R, &G, &B);
-                setQuadrado(x, y, R, G, B);
-                //video_box(x, y, x + BLOCO_TAM - 1, y + BLOCO_TAM - 1, peca.quadrados[i][j].cor);
+                setQuadrado(y, x, R, G, B); //x = linha; y = coluna
             }
         }
     }
@@ -453,24 +449,14 @@ void mostrarAllPecas(Tabuleiro *tab)
             // faz com que mostre na tela as posições que já estão ativas no tabuleiro
             if (tab->ocupado[i][j] == true)
             {
-                //int x = (j * BLOCO_TAM);
-                //int y = (i * BLOCO_TAM);
                 int x = j;
                 int y = i;
-                //int x = peca.pos_x / BLOCO_TAM + j;
-                //int y = peca.pos_y / BLOCO_TAM + i;
 
                 int R, G, B;
                 converterCorParaRGB(tab->cor[i][j], &R, &G, &B);
                 setQuadrado(x, y, R, G, B);
-                //video_box(x, y, x + BLOCO_TAM - 2, y + BLOCO_TAM - 2, tab->cor[i][j]);
             }
         }
-        //video_box(0, 200, 101, 210, video_GREEN); // desenha o limite do linha - baixo
-        //video_box(100, 0, 101, 210, video_GREEN); // desenha o limite da coluna - direita
-        //video_box(0, 0, 101, 10, video_GREEN); // desenha o limite da coluna - cima
-        //video_box(0, 0, 1, 210, video_GREEN); // desenha o limite da coluna - esquerda
-
     }
 }
 
@@ -537,8 +523,8 @@ bool reiniciarGame(Tabuleiro *tabuleiro, Peca peca)
 /********************************************************
 Desenha a tela inicial "tetris" e a tela de "game over"
 *********************************************************/
-void desenha(int matriz[10][25]){
-    for (int i = 0; i < 10; i++){
+void desenha(int matriz[12][25]){
+    for (int i = 0; i < 12; i++){
         for (int j = 0; j < 25; j++){
             // Aumenta as coordenadas para o bloco
             if (matriz[i][j] == 1){
@@ -547,7 +533,8 @@ void desenha(int matriz[10][25]){
                 int R, G, B;
                 int cor = corAleatoria();
                 converterCorParaRGB(cor, &R, &G, &B);
-                set_background_block(block_col, block_line, R, G, B);
+                setQuadrado(block_col + 8, block_line + 8, R, G, B);
+                //set_background_block(block_col, block_line, R, G, B);
             }            
 			//usleep(1500);
         }
@@ -557,8 +544,10 @@ void desenha(int matriz[10][25]){
 int main()
 {   
 
+    //configure_pinmux();
+
     //tela inicial com o nome "tetris"
-    int tetris[10][25] = {
+    int tetris[12][25] = {
         {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
         {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
         {1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1},
@@ -568,11 +557,14 @@ int main()
         {1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1},
         {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
         {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+
     };
 
     //tela de fim de jogo com o nome "game over"
-    int gameOver[10][25] = {
+    int gameOver[12][25] = {
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1},
         {0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1},
@@ -584,7 +576,9 @@ int main()
         {0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0},
         {0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1},
         {0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0}
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}    
     };
 
 
@@ -640,15 +634,14 @@ int main()
     //KEY_open();
     limpaTudo();
     desenha(tetris);
-    sleep(10);
+    sleep(5);
     limpaDevagar();
-    limpa();
+    //limpa();
     while (1)
     {
-        //video_erase();
         while (!verificarColisao(&tab, peca))
         {
-            usleep(95000);
+            usleep(99000);
             //KEY_read(&pause);
             //printf("botao: %d", pause);
             // if (pause != 0)
@@ -691,11 +684,11 @@ int main()
                 desenhaPeca(peca);
 
                 moverPeca(&peca, 10); // move para baixo
-                if (accel_data[0] < -5)
+                if (accel_data[0] < -15)
                 {
                     moverDirOuEsq(&tab, &peca, -10);
                 } // move para a esquerda
-                else if (accel_data[0] > 5)
+                else if (accel_data[0] > 15)
                 {
                     moverDirOuEsq(&tab, &peca, 10);
                 } // move para a direita
@@ -731,10 +724,10 @@ int main()
 
                 limpaTudo();
                 desenha(gameOver);
-                sleep(10);
+                sleep(5);
                 limpaDevagar();
                 desenha(tetris);
-                sleep(10);
+                sleep(5);
                 limpaDevagar();
 
                 //KEY_read(&pause);
@@ -762,8 +755,6 @@ int main()
         mostrarAllPecas(&tab);
     }
     
-
-    //video_close();
 
     // Desabilitar o I2C0 após a operação
     *((uint32_t *)(i2c_base + IC_ENABLE_REG)) = 0x0;
