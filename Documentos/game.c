@@ -26,6 +26,9 @@ Definições dos endereços usados pra mapear o acelerometro
 
 // Registradores internos do ADXL345
 #define ADXL345_REG_DATA_X0 0x32 // Registrador inicial dos dados X, Y, Z (6 bytes)
+#define DATA_FORMAT 0x31
+#define BW_RATE 0x2C
+#define POWER_CTL 0x2D
 
 #define SYSMGR_GENERALIO7 ((volatile unsigned int *) 0xFFD0849C)
 #define SYSMGR_GENERALIO8 ((volatile unsigned int *) 0xFFD084A0)
@@ -109,10 +112,10 @@ void limpa(){
             		// Chama a função para definir o bloco de fundo
             		set_background_block(block_col, block_line, 0, 0, 0);
                      if (j == 20 && i <= 40) {
-                        set_background_block(block_col, block_line, 0b111, 0b000, 0b000); //encontro da coluna e linha
+                        set_background_block(block_col, block_line, 0b000, 0b011, 0b000); //encontro da coluna e linha
                     }
                     if (i == 40 && j <= 20) {
-                        set_background_block(block_col, block_line, 0b111, 0b000, 0b000); //encontro da coluna e linha
+                        set_background_block(block_col, block_line, 0b000, 0b011, 0b000); //encontro da coluna e linha
                     }
 					break;
 			}
@@ -533,7 +536,7 @@ void desenha(int matriz[12][25]){
                 int R, G, B;
                 int cor = corAleatoria();
                 converterCorParaRGB(cor, &R, &G, &B);
-                setQuadrado(block_col, block_line, R, G, B);
+                setQuadrado(block_col + 8, block_line + 8, R, G, B);
                 //set_background_block(block_col, block_line, R, G, B);
             }            
 			//usleep(1500);
@@ -641,7 +644,7 @@ int main()
     {
         while (!verificarColisao(&tab, peca))
         {
-            usleep(95000);
+            usleep(99000);
             //KEY_read(&pause);
             //printf("botao: %d", pause);
             // if (pause != 0)
@@ -651,6 +654,19 @@ int main()
 
             if (valor == 1)
             {
+                //Inicialização do accel
+                *((volatile uint32_t *)(i2c_base + IC_DATA_CMD_REG)) = DATA_FORMAT + 0x400;
+                *((volatile uint32_t *)(i2c_base + IC_DATA_CMD_REG)) = 0x0B;
+
+                *((volatile uint32_t *)(i2c_base + IC_DATA_CMD_REG)) = BW_RATE + 0x400;
+                *((volatile uint32_t *)(i2c_base + IC_DATA_CMD_REG)) = 0x0B;
+
+                *((volatile uint32_t *)(i2c_base + IC_DATA_CMD_REG)) = POWER_CTL + 0x400;
+                *((volatile uint32_t *)(i2c_base + IC_DATA_CMD_REG)) = 0x00;
+
+                *((volatile uint32_t *)(i2c_base + IC_DATA_CMD_REG)) = POWER_CTL + 0x400;
+                *((volatile uint32_t *)(i2c_base + IC_DATA_CMD_REG)) = 0x08;
+
                 // Escrever no IC_DATA_CMD para solicitar a leitura dos dados de X, Y, Z
                 // Enviar o registrador de início de leitura (0x32 - registrador de dados do ADXL345)
                 *((uint32_t *)(i2c_base + IC_DATA_CMD_REG)) = ADXL345_REG_DATA_X0;
@@ -684,11 +700,11 @@ int main()
                 desenhaPeca(peca);
 
                 moverPeca(&peca, 10); // move para baixo
-                if (accel_data[0] < -15)
+                if (accel_data[2] < -10)
                 {
                     moverDirOuEsq(&tab, &peca, -10);
                 } // move para a esquerda
-                else if (accel_data[0] > 15)
+                else if (accel_data[2] > 10)
                 {
                     moverDirOuEsq(&tab, &peca, 10);
                 } // move para a direita
