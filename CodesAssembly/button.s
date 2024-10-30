@@ -11,6 +11,7 @@ fd: .word 0
 HW_REGS_BASE:       .word  0xff200       @ Base address
 HW_REGS_SPAN:       .word  0x04000000       @ Span size
 HW_REGS_MASK:       .word  0x03FFFFFF       @ Mask (SPAN - 1)
+HEX3_HEX0 .word 0x00000020
 ALT_LWFPGASLVS_OFST: .word  0xff200000      @ Offset for FPGA slave address
 DATA_A_BASE:        .word  0x80
 DATA_B_BASE:        .word  0x70
@@ -157,10 +158,30 @@ set_background_block:
 open_button: 
 
     ldr r1, =virtual_base
-    str r0, [r1, #0x0] 
+    ldr r0, [r1, #0x0] 
     bx lr
 
 .align 2
 .section .text
 .global open_button
 .type open_button, %function
+
+open_hex0_3:
+
+    ldr r1, =virtual_base
+    ldr r0, [r1, 0x00000020]
+    bx lr
+.align 2
+.section .text
+.global open_hex0_3
+.type open_hex0_3, %function
+
+open_hex5_4
+
+    ldr r1, =virtual_base
+    ldr r0, [r1, 0x00000030]
+    bx lr
+.align 2
+.section .text
+.global open_hex5_4
+.type open_hex5_4, %function

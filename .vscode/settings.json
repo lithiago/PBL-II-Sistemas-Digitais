@@ -5,6 +5,8 @@
         "hps_0.h": "c",
         "map.h": "c",
         "*.s": "arm",
-        "opensyscall.h": "c"
+        "opensyscall.h": "c",
+        "FURTO.C": "cpp",
+        "stdlib.h": "c"
     }
 }
