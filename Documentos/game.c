@@ -112,10 +112,10 @@ void limpa(){
             		// Chama a função para definir o bloco de fundo
             		set_background_block(block_col, block_line, 0, 0, 0);
                      if (j == 20 && i <= 40) {
-                        set_background_block(block_col, block_line, 0b000, 0b011, 0b000); //encontro da coluna e linha
+                        set_background_block(block_col, block_line, 0b010, 0b011, 0b110); //encontro da coluna e linha
                     }
                     if (i == 40 && j <= 20) {
-                        set_background_block(block_col, block_line, 0b000, 0b011, 0b000); //encontro da coluna e linha
+                        set_background_block(block_col, block_line, 0b010, 0b011, 0b110); //encontro da coluna e linha
                     }
 					break;
 			}
@@ -637,14 +637,14 @@ int main()
     //KEY_open();
     limpaTudo();
     desenha(tetris);
-    sleep(5);
+    sleep(3);
     limpaDevagar();
     //limpa();
     while (1)
     {
         while (!verificarColisao(&tab, peca))
         {
-            usleep(99000);
+            usleep(100000);
             //KEY_read(&pause);
             //printf("botao: %d", pause);
             // if (pause != 0)
@@ -740,10 +740,10 @@ int main()
 
                 limpaTudo();
                 desenha(gameOver);
-                sleep(5);
+                sleep(3);
                 limpaDevagar();
                 desenha(tetris);
-                sleep(5);
+                sleep(3);
                 limpaDevagar();
 
                 //KEY_read(&pause);
