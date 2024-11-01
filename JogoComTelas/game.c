@@ -26,6 +26,9 @@ Definições dos endereços usados pra mapear o acelerometro
 
 // Registradores internos do ADXL345
 #define ADXL345_REG_DATA_X0 0x32 // Registrador inicial dos dados X, Y, Z (6 bytes)
+#define DATA_FORMAT 0x31
+#define BW_RATE 0x2C
+#define POWER_CTL 0x2D
 
 #define SYSMGR_GENERALIO7 ((volatile unsigned int *) 0xFFD0849C)
 #define SYSMGR_GENERALIO8 ((volatile unsigned int *) 0xFFD084A0)
@@ -48,7 +51,7 @@ Logica do game
 #define COLUNA_TABULEIRO 10
 #define LINHA_TABULEIRO 20
 
-int score = 0; // Pontuação do jogador
+int scoreTotal = 0; // Pontuação do jogador
 
 typedef struct
 {
@@ -101,7 +104,7 @@ Funçoes para limpar a tela utilizando a funçao "set_background_block" da nossa
 *******************************************************************************/
 void limpa(){
 	for (int i = 0; i < 41; i++){
-		for (int j = 0; j < 41; j++){
+		for (int j = 0; j < 21; j++){
 			while(1){
 					int block_col =  j;
             		int block_line = i;
@@ -109,10 +112,10 @@ void limpa(){
             		// Chama a função para definir o bloco de fundo
             		set_background_block(block_col, block_line, 0, 0, 0);
                      if (j == 20 && i <= 40) {
-                        set_background_block(block_col, block_line, 0b000, 0b011, 0b000); //encontro da coluna e linha
+                        set_background_block(block_col, block_line, 0b010, 0b011, 0b110); //encontro da coluna e linha
                     }
                     if (i == 40 && j <= 20) {
-                        set_background_block(block_col, block_line, 0b000, 0b011, 0b000); //encontro da coluna e linha
+                        set_background_block(block_col, block_line, 0b010, 0b011, 0b110); //encontro da coluna e linha
                     }
 					break;
 			}
@@ -237,10 +240,10 @@ Peca criarPecasAleatorias()
         peca.quadrados[2][2].ativo = true;
         break;
     case 2: // Peça "T"
-        peca.quadrados[1][1].ativo = true;
-        peca.quadrados[0][1].ativo = true;
-        peca.quadrados[2][1].ativo = true;
         peca.quadrados[1][0].ativo = true;
+        peca.quadrados[1][1].ativo = true;
+        peca.quadrados[1][2].ativo = true;
+        peca.quadrados[0][1].ativo = true;
         break;
     case 3: // Peça "L"
         peca.quadrados[0][1].ativo = true;
@@ -255,9 +258,9 @@ Peca criarPecasAleatorias()
         peca.quadrados[2][0].ativo = true;
         break;
     case 5: // Peça "Z"
-        peca.quadrados[0][1].ativo = true;
         peca.quadrados[1][1].ativo = true;
         peca.quadrados[1][2].ativo = true;
+        peca.quadrados[2][1].ativo = true;
         peca.quadrados[2][2].ativo = true;
         break;
         peca.quadrados[0][1].ativo = true;
@@ -266,10 +269,10 @@ Peca criarPecasAleatorias()
         peca.quadrados[3][1].ativo = true;
         break;
     case 6: // Peça "S"
-        peca.quadrados[0][2].ativo = true;
         peca.quadrados[1][1].ativo = true;
         peca.quadrados[1][2].ativo = true;
         peca.quadrados[2][1].ativo = true;
+        peca.quadrados[2][2].ativo = true;
         break;
     case 7: // Peça "---"
         peca.quadrados[0][0].ativo = true;
@@ -473,7 +476,7 @@ void verificaLinhaCompleta(Tabuleiro *tab) {
         }
 
         if (linhaCompleta) {
-            score += 10;
+            scoreTotal += 1;
             //velocidade -= 3500;
 
             // desocupa a linha completa
@@ -523,7 +526,7 @@ bool reiniciarGame(Tabuleiro *tabuleiro, Peca peca)
 /********************************************************
 Desenha a tela inicial "tetris" e a tela de "game over"
 *********************************************************/
-void desenha(int matriz[12][25]){
+void desenha(int matriz[12][25],int x, int y){
     for (int i = 0; i < 12; i++){
         for (int j = 0; j < 25; j++){
             // Aumenta as coordenadas para o bloco
@@ -533,8 +536,44 @@ void desenha(int matriz[12][25]){
                 int R, G, B;
                 int cor = corAleatoria();
                 converterCorParaRGB(cor, &R, &G, &B);
-                setQuadrado(block_col + 8, block_line + 8, R, G, B);
+                setQuadrado(block_col + x, block_line + y, R, G, B);
                 //set_background_block(block_col, block_line, R, G, B);
+            }            
+			//usleep(1500);
+        }
+    }
+}
+
+void desenhaS(int matriz[12][25],int x, int y){
+    for (int i = 0; i < 12; i++){
+        for (int j = 0; j < 25; j++){
+            // Aumenta as coordenadas para o bloco
+            if (matriz[i][j] == 1){
+                int block_col = j;
+                int block_line = i;
+                int R, G, B;
+                int cor = corAleatoria();
+                converterCorParaRGB(cor, &R, &G, &B);
+                //setQuadrado(block_col + x, block_line + y, R, G, B);
+                set_background_block(block_col + x, block_line + y, R, G, B);
+            }            
+			//usleep(1500);
+        }
+    }
+}
+
+void desenhaNumero(int matriz[9][8],int x, int y){
+    for (int i = 0; i < 9; i++){
+        for (int j = 0; j < 8; j++){
+            // Aumenta as coordenadas para o bloco
+            if (matriz[i][j] == 1){
+                int block_col = j;
+                int block_line = i;
+                int R, G, B;
+                int cor = corAleatoria();
+                converterCorParaRGB(cor, &R, &G, &B);
+                //setQuadrado(block_col + x, block_line + y, R, G, B);
+                set_background_block(block_col + x, block_line + y, R, G, B);
             }            
 			//usleep(1500);
         }
@@ -545,7 +584,7 @@ int main()
 {   
 
     //configure_pinmux();
-
+    //set_background_color(0b111,0b111,0b111);
     //tela inicial com o nome "tetris"
     int tetris[12][25] = {
         {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -580,6 +619,162 @@ int main()
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}    
     };
+
+    int score[12][25] = {
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0},
+        {1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0},
+        {1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0},
+        {1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0},
+        {1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0},
+        {1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0},
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}  
+    };
+
+    int num0[9][8] = {
+        {1,1,1,1,1,1,1,1},
+        {1,0,0,0,0,0,0,1},
+        {1,0,1,1,1,1,0,1},
+        {1,0,1,0,0,1,0,1},
+        {1,0,1,0,0,1,0,1},
+        {1,0,1,0,0,1,0,1},
+        {1,0,1,1,1,1,0,1},
+        {1,0,0,0,0,0,0,1},
+        {1,1,1,1,1,1,1,1}
+    };
+
+    int num1[9][8] = {
+        {1,1,1,1,1,1,1,1},
+        {1,0,0,0,0,0,0,1},
+        {1,0,0,1,0,0,0,1},
+        {1,0,1,1,0,0,0,1},
+        {1,0,0,1,0,0,0,1},
+        {1,0,0,1,0,0,0,1},
+        {1,0,1,1,1,0,0,1},
+        {1,0,0,0,0,0,0,1},
+        {1,1,1,1,1,1,1,1}
+    };
+
+    int num2[9][8] = {
+        {1,1,1,1,1,1,1,1},
+        {1,0,0,0,0,0,0,1},
+        {1,0,1,1,1,1,0,1},
+        {1,0,1,0,0,1,0,1},
+        {1,0,0,0,1,0,0,1},
+        {1,0,0,1,0,0,0,1},
+        {1,0,1,1,1,1,0,1},
+        {1,0,0,0,0,0,0,1},
+        {1,1,1,1,1,1,1,1}
+    };
+
+    int num3[9][8] = {
+        {1,1,1,1,1,1,1,1},
+        {1,0,0,0,0,0,0,1},
+        {1,0,1,1,1,1,0,1},
+        {1,0,0,0,0,1,0,1},
+        {1,0,0,1,1,1,0,1},
+        {1,0,0,0,0,1,0,1},
+        {1,0,1,1,1,1,0,1},
+        {1,0,0,0,0,0,0,1},
+        {1,1,1,1,1,1,1,1}
+    };
+
+    int num4[9][8] = {
+        {1,1,1,1,1,1,1,1},
+        {1,0,0,0,0,0,0,1},
+        {1,0,1,0,0,1,0,1},
+        {1,0,1,0,0,1,0,1},
+        {1,0,1,1,1,1,0,1},
+        {1,0,0,0,0,1,0,1},
+        {1,0,0,0,0,1,0,1},
+        {1,0,0,0,0,0,0,1},
+        {1,1,1,1,1,1,1,1}
+    };
+
+    int num5[9][8] = {
+        {1,1,1,1,1,1,1,1},
+        {1,0,0,0,0,0,0,1},
+        {1,0,1,1,1,1,0,1},
+        {1,0,1,0,0,0,0,1},
+        {1,0,1,1,1,1,0,1},
+        {1,0,0,0,0,1,0,1},
+        {1,0,1,1,1,1,0,1},
+        {1,0,0,0,0,0,0,1},
+        {1,1,1,1,1,1,1,1}
+    };
+
+    int num6[9][8] = {
+        {1,1,1,1,1,1,1,1},
+        {1,0,0,0,0,0,0,1},
+        {1,0,1,1,1,1,0,1},
+        {1,0,1,0,0,0,0,1},
+        {1,0,1,1,1,1,0,1},
+        {1,0,1,0,0,1,0,1},
+        {1,0,1,1,1,1,0,1},
+        {1,0,0,0,0,0,0,1},
+        {1,1,1,1,1,1,1,1}
+    };
+
+    int num7[9][8] = {
+        {1,1,1,1,1,1,1,1},
+        {1,0,0,0,0,0,0,1},
+        {1,0,1,1,1,1,0,1},
+        {1,0,0,0,0,1,0,1},
+        {1,0,0,0,1,0,0,1},
+        {1,0,0,1,0,0,0,1},
+        {1,0,1,0,0,0,0,1},
+        {1,0,0,0,0,0,0,1},
+        {1,1,1,1,1,1,1,1}
+    };
+
+    int num8[9][8] = {
+        {1,1,1,1,1,1,1,1},
+        {1,0,0,0,0,0,0,1},
+        {1,0,1,1,1,1,0,1},
+        {1,0,1,0,0,1,0,1},
+        {1,0,1,1,1,1,0,1},
+        {1,0,1,0,0,1,0,1},
+        {1,0,1,1,1,1,0,1},
+        {1,0,0,0,0,0,0,1},
+        {1,1,1,1,1,1,1,1}
+    };
+
+    int num9[9][8] = {
+        {1,1,1,1,1,1,1,1},
+        {1,0,0,0,0,0,0,1},
+        {1,0,1,1,1,1,0,1},
+        {1,0,1,0,0,1,0,1},
+        {1,0,0,1,1,1,0,1},
+        {1,0,0,0,0,1,0,1},
+        {1,0,1,1,1,0,0,1},
+        {1,0,0,0,0,0,0,1},
+        {1,1,1,1,1,1,1,1}
+    };
+
+    int numeros[10] = {num0,num1,num2,num3,num4,num5,num6,num7,num8,num9};
+
+    // int score[12][25] = {
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}    
+    // };
 
 
     int jogadas = 0;
@@ -633,15 +828,16 @@ int main()
     int valor = 1;
     //KEY_open();
     limpaTudo();
-    desenha(tetris);
-    sleep(5);
+    desenha(tetris,8,8);
+    sleep(3);
     limpaDevagar();
     //limpa();
     while (1)
     {
         while (!verificarColisao(&tab, peca))
         {
-            usleep(99000);
+            //sleep(1);
+            usleep(199990);
             //KEY_read(&pause);
             //printf("botao: %d", pause);
             // if (pause != 0)
@@ -651,6 +847,19 @@ int main()
 
             if (valor == 1)
             {
+                //Inicialização do accel
+                *((volatile uint32_t *)(i2c_base + IC_DATA_CMD_REG)) = DATA_FORMAT + 0x400;
+                *((volatile uint32_t *)(i2c_base + IC_DATA_CMD_REG)) = 0x0B;
+
+                *((volatile uint32_t *)(i2c_base + IC_DATA_CMD_REG)) = BW_RATE + 0x400;
+                *((volatile uint32_t *)(i2c_base + IC_DATA_CMD_REG)) = 0x0B;
+
+                *((volatile uint32_t *)(i2c_base + IC_DATA_CMD_REG)) = POWER_CTL + 0x400;
+                *((volatile uint32_t *)(i2c_base + IC_DATA_CMD_REG)) = 0x00;
+
+                *((volatile uint32_t *)(i2c_base + IC_DATA_CMD_REG)) = POWER_CTL + 0x400;
+                *((volatile uint32_t *)(i2c_base + IC_DATA_CMD_REG)) = 0x08;
+
                 // Escrever no IC_DATA_CMD para solicitar a leitura dos dados de X, Y, Z
                 // Enviar o registrador de início de leitura (0x32 - registrador de dados do ADXL345)
                 *((uint32_t *)(i2c_base + IC_DATA_CMD_REG)) = ADXL345_REG_DATA_X0;
@@ -684,16 +893,19 @@ int main()
                 desenhaPeca(peca);
 
                 moverPeca(&peca, 10); // move para baixo
-                if (accel_data[0] < -15)
+                if (accel_data[2] < -10)
                 {
                     moverDirOuEsq(&tab, &peca, -10);
                 } // move para a esquerda
-                else if (accel_data[0] > 15)
+                else if (accel_data[2] > 10)
                 {
                     moverDirOuEsq(&tab, &peca, 10);
                 } // move para a direita
 
                 limpa();
+                desenhaS(score, 50, 3);
+                desenhaNumero(numeros[scoreTotal], 60, 15);
+                
                 desenhaPeca(peca);
                 mostrarAllPecas(&tab);
             }
@@ -723,11 +935,11 @@ int main()
                 //video_erase();
 
                 limpaTudo();
-                desenha(gameOver);
-                sleep(5);
+                desenha(gameOver,8,8);
+                sleep(3);
                 limpaDevagar();
-                desenha(tetris);
-                sleep(5);
+                desenha(tetris,8,8);
+                sleep(3);
                 limpaDevagar();
 
                 //KEY_read(&pause);
@@ -735,7 +947,7 @@ int main()
                 // {   
 
                 //     pontos[jogadas] = score;                    
-                //     score = 0;
+                     scoreTotal = 0;
                 //     jogadas += 1;
                 //     if (jogadas == 3){
                 //         jogadas = 0;
