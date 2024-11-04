@@ -11,6 +11,7 @@ fd: .word 0
 HW_REGS_BASE:       .word  0xff200       @ Base address
 HW_REGS_SPAN:       .word  0x04000000       @ Span size
 HW_REGS_MASK:       .word  0x03FFFFFF       @ Mask (SPAN - 1)
+@HEX3_HEX0 .word 0x00000020
 ALT_LWFPGASLVS_OFST: .word  0xff200000      @ Offset for FPGA slave address
 DATA_A_BASE:        .word  0x80
 DATA_B_BASE:        .word  0x70
@@ -18,6 +19,7 @@ WRREG_BASE:         .word  0xc0
 WRFULL_BASE:        .word  0xb0
 SCREEN_BASE:        .word  0xa0
 RESET_PULSECOUNTER_BASE: .word  0x90
+KEYS_BASE: .word 0x0
 
 
 .align 2
@@ -100,39 +102,58 @@ sendInstruction:
     str r1, [r3, r4] @ armazena o valor passado de dataA para o endereço de dataA
 
     mov r2, #1
-    mov r4, #0xc0
 
-    str r2, [r3, r4] @para abertura e armazenamento do dataA e B
+    str r2, [r3, #0xc0] @para abertura e armazenamento do dataA e B
 
     mov r2, #0
-    mov r4, #0xc0
 
-    str r2, [r3, r4] @ para abertura e armazenamento do dataA e B
+    str r2, [r3, #0xc0] @ para abertura e armazenamento do dataA e B
 
     pop {r4, lr}
     bx lr
-
 .align 2
 .section .text
 .global set_background_block
 .type set_background_block, %function
+isFull:
+      @ verifica se wreg esta full
+    ldr r3, =virtual_base
+    ldr r3, [r3]
+    mov r5, #0xb0
+    ldr r4, [r3, r5]
+    cmp r4, #0
+    bne isFull
+.align 2
+.section .text
+.global isFull
+.type isFull, %function
 
+open_hex:
+    sub sp, sp #16 @ GUARDA O PARAMETRO PASSADO 
+    str r0, [sp, #8]
+    str lr, [sp, #0]
+    bl createMappingMemory @ REFAZ O MAPEAMENTO
+    ldr r1, [sp, #8] @ CARREGA O PARAMETRO QUE FOI ARMAZENADO NA PILHA
+    ldr r0, [r0, r1] @ SOMA COM O OFFSET DO DIGITO PASSADO POR PARAMETRO
+    ldr lr, [sp, #0] @ CARREGA O ENDEREÇO DE RETORNO
+    addi sp, sp, #16 @ RESTAURA A PILHA
+    bx lr
+.align 2
+.section .text
+.global open_hex
+.type open_hex, %function
 set_background_block:
     @ r0 = column, r1= line, r2 = r, r3 = g, sp+4 = b; se tiver outro, o b estará em sp+8 e o novo em sp+4
-    push {r4-r7,lr}
+    push {r4-r6,lr}
 
-    ldr r4, [sp, #4]
-
-    ldr r5, =virtual_base
-    ldr r5, [r5]
-
+    ldr r4, [sp, #16]
     mov r6, #80
     mul r6, r1, r6
     add r6, r6, r0 @ r6 = adress
 
     @ dataA Builder
     lsl r6, r6, #4
-    add r6, r6, #2
+    orr r6, r6, #2
 
     @ color = r4
     lsl r4, r4, #3
@@ -145,6 +166,19 @@ set_background_block:
 
     bl sendInstruction
 
-    pop {r4-r7,lr}
+    pop {r4-r6,lr}
     bx lr
-    
+          
+open_button: 
+
+    ldr r1, =virtual_base
+    @ldr r1, [r1]
+    @mov r2, #0x0
+    ldr r0, [r1, #0x0]
+    bx lr
+.align 2
+.section .text
+.global open_button
+.type open_button, %function
+
+

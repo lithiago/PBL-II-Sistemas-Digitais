@@ -116,7 +116,7 @@ int main(void)
    if ((fd = open_physical (fd)) == -1)
 
       return (-1);
-
+    
    if ((LW_virtual = map_physical (fd, LW_BRIDGE_BASE, LW_BRIDGE_SPAN)) == NULL)
 
       return (-1);

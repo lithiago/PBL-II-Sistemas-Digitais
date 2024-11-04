@@ -173,7 +173,6 @@ set_background_block:
     bx lr
           
 open_button: 
-
     ldr r1, =virtual_base
     @ldr r1, [r1]
     @mov r2, #0x0
