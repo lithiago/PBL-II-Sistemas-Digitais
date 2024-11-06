@@ -44,6 +44,7 @@ int main() {
     while(1) {
         set_sprite(1, 220, 100, 0 , 0);
         setPolygon(0b0000, 0b0011, 0b000000111, 0, 0b0001, 150, 150);
+        //set_background_color(0b000, 0b000, 0b000);
     }
 
     return 0;
