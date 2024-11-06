@@ -6,8 +6,9 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <time.h>
-#include "graphic_functions.c"
-#include "logic_game.c"
+#include "graphic_functions.h"
+#include "logic_game.h"
+#include "button.h"
 
 #define I2C0_BASE_ADDR 0xFFC04000                   // Endereço base do I2C0
 #define IC_CON_OFFSET 0x0                           // Deslocamento do registrador ic_con

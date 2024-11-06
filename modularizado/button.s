@@ -136,7 +136,7 @@ open_hex:
     ldr r1, [sp, #8] @ CARREGA O PARAMETRO QUE FOI ARMAZENADO NA PILHA
     ldr r0, [r0, r1] @ SOMA COM O OFFSET DO DIGITO PASSADO POR PARAMETRO
     ldr lr, [sp, #0] @ CARREGA O ENDEREÇO DE RETORNO
-    addi sp, sp, #16 @ RESTAURA A PILHA
+    add sp, sp, #16 @ RESTAURA A PILHA
     bx lr
 .align 2
 .section .text

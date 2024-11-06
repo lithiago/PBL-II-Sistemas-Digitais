@@ -1,7 +1,7 @@
 #ifndef GRAPHIC_FUNCTIONS
 #define GRAPHIC_FUNCTIONS
 
-#include <logic_game.h>
+#include "logic_game.h"
 
 #define BLOCO_TAM 10
 #define LARGURA_TELA 300

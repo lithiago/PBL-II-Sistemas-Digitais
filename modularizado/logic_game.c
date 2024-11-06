@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <time.h>
 #include "logic_game.h"
+#include "button.h"
 
 int scoreTotal = 0;
 int corAleatoria()
