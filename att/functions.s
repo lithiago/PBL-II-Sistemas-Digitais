@@ -192,16 +192,16 @@ setPolygon:
 
     @dataB
     lsl r3, r3, #9 @color
-    orr r3, r3, #111
+    orr r3, r3, r2
 
-    lsl r3, r3, #4
-    orr r3, r3, #1
+    lsl r3, r3, #4 @mult
+    orr r3, r3, r4 
 
-    lsl r3, r3, #9
-    orr r3, r3, #4
+    lsl r3, r3, #9 @ref_y
+    orr r3, r3, r6
 
-    lsl r3, r3, #9
-    orr r3, r3, #4
+    lsl r3, r3, #9 @ref_x
+    orr r3, r3, r5
 
     mov r1, r3
     bl sendInstruction
