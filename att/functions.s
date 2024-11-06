@@ -178,30 +178,79 @@ set_sprite:
 .global setPolygon
 .type setPolygon, %function
 
+
 setPolygon:
     @address, opcode, color, form, mult, ref_point_x, ref_point_y
-    push {r4-r8,lr}
+    push {r4-r6,lr}
 
     ldr r4, [sp, #24] @ mult
+    ldr r5, [sp, #20] @ref_X
+    ldr r6, [sp, #16] @ref_y
 
     @ dataA Builder
     lsl r0, r0, #4 @ caso necessário fazer com o addres para o caso 3
 
     @dataB
-    lsl r3, r3, #9
-    orr r3, r3, r2
+    lsl r3, r3, #9 @color
+    orr r3, r3, #111
 
     lsl r3, r3, #4
-    orr r3, r3, r4
+    orr r3, r3, #1
 
     lsl r3, r3, #9
-    orr r3, r3, r6
+    orr r3, r3, #4
 
     lsl r3, r3, #9
-    orr r3, r3, r5
+    orr r3, r3, #4
 
     mov r1, r3
     bl sendInstruction
 
-    pop {r4-r8,lr}
+    pop {r4-r6,lr}
+    bx lr
+
+
+.align 2
+.section .text
+.global set_background_color
+.type set_background_color, %function
+
+set_background_color:
+    @R, G, B
+    push {lr}
+
+    @ dataA Builder
+    lsl r3, r3, #4
+
+    @ dataB
+    lsl r2, r2, #3
+    orr r2, r2, r1
+
+    lsl r2, r2, #3
+    orr r2, r2, r0
+
+    mov r0, r3
+    mov r1, r2
+    bl sendInstruction
+
+    pop {lr}
+    bx lr
+
+.align 2
+.section .text
+.global closeMappingMemory
+.type closeMappingMemory, %function
+
+closeMappingMemory:
+    @R, G, B
+    push {r4-r7, lr}             
+
+    @ carrega endereço e carrega o valor de fd
+    ldr r0, =fd   
+    ldr r0, [r0]
+
+    mov r7, #6 @ SC/ close
+    svc 0   
+
+    pop {r4-r7, lr}
     bx lr
