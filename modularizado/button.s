@@ -129,14 +129,8 @@ isFull:
 .type isFull, %function
 
 open_hex:
-    sub sp, sp #16 @ GUARDA O PARAMETRO PASSADO 
-    str r0, [sp, #8]
-    str lr, [sp, #0]
-    bl createMappingMemory @ REFAZ O MAPEAMENTO
-    ldr r1, [sp, #8] @ CARREGA O PARAMETRO QUE FOI ARMAZENADO NA PILHA
-    ldr r0, [r0, r1] @ SOMA COM O OFFSET DO DIGITO PASSADO POR PARAMETRO
-    ldr lr, [sp, #0] @ CARREGA O ENDEREÇO DE RETORNO
-    add sp, sp, #16 @ RESTAURA A PILHA
+    ldr r1, =virtual_base
+    ldr r0, [r1, r0] @ SOMA COM O OFFSET DO DIGITO PASSADO POR PARAMETRO
     bx lr
 .align 2
 .section .text
