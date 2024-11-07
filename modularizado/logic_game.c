@@ -7,6 +7,7 @@
 #include <time.h>
 #include "logic_game.h"
 #include "button.h"
+#include "map.h"
 
 int scoreTotal = 0;
 int corAleatoria()
@@ -115,6 +116,11 @@ void moverDirOuEsq(Tabuleiro *tab, Peca *peca, int dx)
             }
         }
     }
+
+    if (podeMover)
+    {
+        peca->pos_x += dx;
+    }
 }
 
 bool verificarColisao(Tabuleiro *tabuleiro, Peca peca)
@@ -173,7 +179,7 @@ void verificaLinhaCompleta(Tabuleiro *tab)
                 tab->ocupado[i][j] = false;
             }
 
-            // mover todas as linhas acima para baixo
+            // mover tatualizaDisplay(score);odas as linhas acima para baixo
             for (int p = i; p > 0; p--)
             {
                 for (int k = 0; k < COLUNA_TABULEIRO; k++)
@@ -196,6 +202,21 @@ void verificaLinhaCompleta(Tabuleiro *tab)
 
 void atualizaDisplay(int score)
 {
+    int fd = -1;
+    void * LW_virtual;
+    if (fd == -1)
+        if ((fd = open( "/dev/mem", (O_RDWR | O_SYNC))) == -1) {
+            printf ("ERROR: could not open \"/dev/mem\"...\n");
+            return (-1);
+        }
+     // Get a mapping from physical addresses to virtual addresses
+    LW_virtual = mmap (NULL, LW_BRIDGE_SPAN, (PROT_READ | PROT_WRITE), MAP_SHARED, fd, LW_BRIDGE_BASE);
+    if (LW_virtual == MAP_FAILED) {
+        printf ("ERROR: mmap() failed...\n");
+        close (fd);
+        return (NULL);
+    }
+
     int centenas = score / 100;
     int dezenas = (score / 100) & 10;
     int unidades = score % 10;
@@ -211,13 +232,19 @@ void atualizaDisplay(int score)
         0b0000000, 
         0b0010000};
 
-    volatile int *DISPLAY_ptr5 = open_hex(hex5);
-    volatile int *DISPLAY_ptr4 = open_hex(hex4);
-    volatile int *DISPLAY_ptr3 = open_hex(hex3);
+    volatile int *DISPLAY_ptr5 = (unsigned int *) (LW_virtual + 0x10); // SEGMENTO A, B, C, D
+    volatile int *DISPLAY_ptr4 = (unsigned int *) (LW_virtual + 0x20); // SEGMENTO E F G
+    volatile int *DISPLAY_ptr3 = (unsigned int *) (LW_virtual + 0x30); // SEGMENTO E F G
+    volatile int *DISPLAY_ptr2 = (unsigned int *) (LW_virtual + 0x40); // SEGMENTO E F G
+    volatile int *DISPLAY_ptr1 = (unsigned int *) (LW_virtual + 0x50); // SEGMENTO E F G
+    volatile int *DISPLAY_ptr0 = (unsigned int *) (LW_virtual + 0x60); // SEGMENTO E F G
 
     *DISPLAY_ptr5 = numeros[centenas];    // Exibe o dígito das centenas
     *DISPLAY_ptr4 = numeros[dezenas];     // Exibe o dígito das dezenas
     *DISPLAY_ptr3 = numeros[unidades];    // Exibe o dígito das unidades
+    *DISPLAY_ptr2 = numeros[0];    // Exibe o dígito das unidades
+    *DISPLAY_ptr1 = numeros[0];    // Exibe o dígito das unidades
+    *DISPLAY_ptr0 = numeros[0];    // Exibe o dígito das unidades
 
 }
 
@@ -345,4 +372,18 @@ Peca criarPecasAleatorias()
     }
 
     return peca;
+}
+
+Peca copiaPeca(Peca peca){
+    Peca anterior;
+    anterior.pos_x = peca.pos_x;
+    anterior.pos_y = peca.pos_y;
+    for (int i = 0; i < 4; i++){
+        for (int j = 0; j < 4; j++){
+            anterior.quadrados[i][j] = peca.quadrados[i][j];
+        }
+    }
+    anterior.tam_x = peca.tam_x;
+    anterior.tam_y = peca.tam_y;
+    return anterior;
 }
