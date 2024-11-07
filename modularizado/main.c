@@ -8,6 +8,8 @@
 #include <time.h>
 #include "graphic_functions.h"
 #include "logic_game.h"
+#include "logic_game.c"
+#include "graphic_functions.c"
 #include "button.h"
 
 #define I2C0_BASE_ADDR 0xFFC04000                   // Endereço base do I2C0
@@ -30,12 +32,17 @@
 #define SYSMGR_GENERALIO7 ((volatile unsigned int *)0xFFD0849C)
 #define SYSMGR_GENERALIO8 ((volatile unsigned int *)0xFFD084A0)
 #define SYSMGR_I2C0USEFPGA ((volatile unsigned int *)0xFFD08704)
-int scoreTotal = 0; // Pontuação do jogador
+//int scoreTotal = 0; // Pontuação do jogador
 
 int main()
 {
 
     int numeros[10] = {num0, num1, num2, num3, num4, num5, num6, num7, num8, num9};
+    int numeros1[10] = {num0, num1, num2, num3, num4, num5, num6, num7, num8, num9};
+    int numeros2[10] = {num0, num1, num2, num3, num4, num5, num6, num7, num8, num9};
+
+
+
     int jogadas = 0;
     int fd1;
     void *i2c_base;
@@ -78,17 +85,25 @@ int main()
     iniTabuleiro(&tab);
 
     Peca peca = criarPecasAleatorias();
+    Peca pecaNova = criarPecasAleatorias();
     volatile uint32_t *KEY_ptr;
     KEY_ptr = open_button();
 
+    set_background_color(0b111, 0, 0);
+
     int valor = 1;
+    int centenas = 0;
+    int dezenas = 0;
+    int unidades = 0;
     limpaTudo();
     desenha(tetris, 8, 8);
-    sleep(3);
+    //sleep(3);
+    atualizaDisplay(0);
     while (1)
     {
         if (*KEY_ptr == 0b1110)
         {
+            //valor = -1;
             limpaDevagar();
             break;
         }
@@ -98,12 +113,16 @@ int main()
     {
         while (!verificarColisao(&tab, peca))
         {
-            usleep(100000);
+            usleep(150000);            
             KEY_ptr = open_button();
-            if (*KEY_ptr == 0b1110)
-            { // 4 BOTAO
-                valor *= -1;
-                limpa();
+            //while(1){
+                if (*KEY_ptr == 0b1110){ // 4 BOTAO
+                    valor *= -1;
+                    limpaTudo();
+                   // break;
+                }
+            //}
+            
                 if (valor == 1)
                 {
                     // Inicialização do accel
@@ -130,8 +149,7 @@ int main()
                     }
 
                     // Verificar o IC_RXFLR para garantir que os dados estejam prontos para leitura
-                    while (*((uint32_t *)(i2c_base + IC_RXFLR_REG)) < 6)
-                        ;
+                    while (*((uint32_t *)(i2c_base + IC_RXFLR_REG)) < 6);
 
                     // Ler os dados do IC_DATA_CMD (6 bytes: 2 para X, 2 para Y, 2 para Z)
                     int16_t accel_data[3] = {0}; // Array para armazenar os valores de X, Y, Z
@@ -146,36 +164,50 @@ int main()
 
                     printf("\n------------------------------------\n");
                     printf("Aceleração em X: %d\n", accel_data[0]);
+                    printf("Aceleração em Z: %d\n", accel_data[2]);
                     printf("\n------------------------------------\n");
 
+                    if (*KEY_ptr == 0b1101){
+                        //0b1101
+                        pecaNova = criarPecasAleatorias();
+                        peca = copiaPeca(pecaNova);
+                    }
                     desenhaPeca(peca);
-
+                    
                     moverPeca(&peca, 10); // move para baixo
                     if (accel_data[2] < -10)
                     {
                         moverDirOuEsq(&tab, &peca, -10);
                     } // move para a esquerda
-                    else if (accel_data[2] > 10)
+                    if (accel_data[2] > 10)
                     {
                         moverDirOuEsq(&tab, &peca, 10);
                     } // move para a direita
 
                     limpa();
                     desenhaS(score, 50, 3);
-                    desenhaNumero(numeros[scoreTotal], 60, 15);
+                    desenhaNumero(numeros[scoreTotal % 10], 60, 15);
+                    desenhaNumero(numeros1[(scoreTotal / 100) & 10], 55, 15);
+                    desenhaNumero(numeros2[scoreTotal / 100], 50, 15);
 
+
+                    if (*KEY_ptr == 0b1101){
+                        //0b1101
+                        pecaNova = criarPecasAleatorias();
+                        peca = copiaPeca(pecaNova);
+                    }
                     desenhaPeca(peca);
                     mostrarAllPecas(&tab);
                 }
                 else
                 {
+                 //   limpaTudo();
                     desenha(pauseMatriz, 8, 8);
                 }
             }
 
             addPecaNoTabuleiro(&tab, peca);
             verificaLinhaCompleta(&tab);
-
             peca = criarPecasAleatorias();
 
             if (reiniciarGame(&tab, peca))
@@ -188,23 +220,26 @@ int main()
 
                     limpaTudo();
                     desenha(gameOver, 8, 8);
-                    sleep(3);
-                    if (*KEY_ptr == 0b1110)
+                    //sleep(3);
+                    while (1)
                     {
-                        limpaDevagar();
+                        if (*KEY_ptr == 0b1110){
+                            //0b1101
+                            limpaDevagar();
+                            break;
+                        }
                     }
+                    
+                  
                     desenha(tetris, 8, 8);
-                    sleep(3);
+                    //sleep(3);
                     scoreTotal = 0;
 
                     break;
                 }
-                if (*KEY_ptr == 0b1110)
-                {
                     limpaDevagar();
                     iniTabuleiro(&tab); // reinicia o tabuleiro ao apertar o botão
                     valor = 1;
-                }
             }
             limpaTudo();
             mostrarAllPecas(&tab);
@@ -213,12 +248,12 @@ int main()
         *((uint32_t *)(i2c_base + IC_ENABLE_REG)) = 0x0;
         printf("I2C desabilitado\n");
 
-        closeMappingMemory();
+        //closeMappingMemory();
 
         // Desmapear a memória e fechar o arquivo de memória
         munmap(i2c_base, MAP_SIZE);
         close(fd1);
 
         return 0;
-    }
+    
 }
