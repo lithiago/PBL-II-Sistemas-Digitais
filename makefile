@@ -1,4 +1,0 @@
-all:
-	as -o teste.o functions.s
-	gcc -std=c99 game.c -lintelfpgaup teste.o -o teste
-	sudo ./teste
