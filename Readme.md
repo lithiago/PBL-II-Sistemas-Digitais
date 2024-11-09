@@ -1,5 +1,5 @@
 # Assembly e Bibliotecas de Software
-## Problema 2| - TEC499 - MI Sistemas Digitais - 2024.2 
+## Problema II - TEC499 - MI Sistemas Digitais - 2024.2 
 
 Professor: Wild Freitas da Silva Santos
 
@@ -154,5 +154,23 @@ O uso do código assembly permitiu uma melhor manipulação dos componentes grá
     <img src="folder/pauseTetris.jpg" alt="Figura 3: Tela de GameOver do jogo." width="300" height="200">
     <p>Figura 14: Tela de Pause do jogo.</p>
 </div>
+<div style="display: flex; flex-direction: column; align-items: center;">  
+    <img src="folder/poligono.jpg" alt="Figura 3: Tela de GameOver do jogo." width="250" height="300">
+    <p>Figura 15: Tela com Poligonos.</p>
+</div>
+
+<div style="display: flex; flex-direction: column; align-items: center;">  
+    <img src="folder/sprites.jpg" alt="Figura 3: Tela de GameOver do jogo." width="250" height="300">
+    <p>Figura 16: Tela com Sprites.</p>
+</div>
+
 
 ## Referências
+[1] Chromium OS Docs, "Syscalls." Accessed Nov. 8, 2024. [Online]. Available: https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md
+
+
+
+
+
+
+

@@ -6,7 +6,7 @@
 #include <fcntl.h>
 #include <time.h>
 #include "logic_game.h"
-#include "button.h"
+#include "Biblioteca_GPU.h"
 #include "map.h"
 
 int scoreTotal = 0;

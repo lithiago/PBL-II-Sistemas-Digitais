@@ -10,7 +10,7 @@
 #include "logic_game.h"
 #include "logic_game.c"
 #include "graphic_functions.c"
-#include "button.h"
+#include "Biblioteca_GPU.h"
 
 #define I2C0_BASE_ADDR 0xFFC04000                   // Endereço base do I2C0
 #define IC_CON_OFFSET 0x0                           // Deslocamento do registrador ic_con

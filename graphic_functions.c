@@ -7,7 +7,7 @@
 #include <time.h>
 #include "graphic_functions.h"
 #include "logic_game.h"
-#include "button.h"
+#include "Biblioteca_GPU.h"
 
 void setQuadrado(int coluna, int linha, int R, int G, int B)
 {

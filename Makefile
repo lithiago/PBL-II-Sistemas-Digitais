@@ -1,4 +1,4 @@
 all:
-	as -o button.o button.s
-	gcc -std=c99 main.c -lintelfpgaup button.o -o teste
+	as -o LIB.o Biblioteca_GPU.s
+	gcc -std=c99 main.c -lintelfpgaup LIB.o -o teste
 	sudo ./teste
